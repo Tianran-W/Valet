@@ -1,5 +1,4 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 /// API 客户端类，用于处理与服务器的通信
 class ApiClient {
@@ -8,6 +7,9 @@ class ApiClient {
   
   /// 可选的请求头
   final Map<String, String> defaultHeaders;
+  
+  /// Dio 实例
+  late final Dio _dio;
 
   /// 构造函数
   ApiClient({
@@ -16,64 +18,83 @@ class ApiClient {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     },
-  });
+  }) {
+    _dio = Dio(BaseOptions(
+      baseUrl: baseUrl,
+      headers: defaultHeaders,
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+    ));
+  }
 
   /// 执行 GET 请求
   Future<dynamic> get(String endpoint, {Map<String, String>? headers}) async {
-    final url = Uri.parse('$baseUrl$endpoint');
-    final response = await http.get(
-      url,
-      headers: {...defaultHeaders, ...?headers},
-    );
-    return _handleResponse(response);
+    try {
+      final response = await _dio.get(
+        endpoint,
+        options: headers != null ? Options(headers: headers) : null,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      return _handleDioException(e);
+    }
   }
 
   /// 执行 POST 请求
   Future<dynamic> post(String endpoint, {dynamic body, Map<String, String>? headers}) async {
-    final url = Uri.parse('$baseUrl$endpoint');
-    final response = await http.post(
-      url,
-      headers: {...defaultHeaders, ...?headers},
-      body: body != null ? json.encode(body) : null,
-    );
-    return _handleResponse(response);
+    try {
+      final response = await _dio.post(
+        endpoint,
+        data: body,
+        options: headers != null ? Options(headers: headers) : null,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      return _handleDioException(e);
+    }
   }
 
   /// 执行 PUT 请求
   Future<dynamic> put(String endpoint, {dynamic body, Map<String, String>? headers}) async {
-    final url = Uri.parse('$baseUrl$endpoint');
-    final response = await http.put(
-      url,
-      headers: {...defaultHeaders, ...?headers},
-      body: body != null ? json.encode(body) : null,
-    );
-    return _handleResponse(response);
+    try {
+      final response = await _dio.put(
+        endpoint,
+        data: body,
+        options: headers != null ? Options(headers: headers) : null,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      return _handleDioException(e);
+    }
   }
 
   /// 执行 DELETE 请求
   Future<dynamic> delete(String endpoint, {Map<String, String>? headers}) async {
-    final url = Uri.parse('$baseUrl$endpoint');
-    final response = await http.delete(
-      url,
-      headers: {...defaultHeaders, ...?headers},
-    );
-    return _handleResponse(response);
+    try {
+      final response = await _dio.delete(
+        endpoint,
+        options: headers != null ? Options(headers: headers) : null,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      return _handleDioException(e);
+    }
   }
 
-  /// 处理 HTTP 响应
-  dynamic _handleResponse(http.Response response) {
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      // 成功响应
-      if (response.body.isNotEmpty) {
-        return json.decode(response.body);
-      }
-      return null;
-    } else {
-      // 错误处理
+  /// 处理 Dio 异常
+  dynamic _handleDioException(DioException e) {
+    final response = e.response;
+    if (response != null) {
       throw ApiException(
-        statusCode: response.statusCode,
-        message: response.reasonPhrase ?? 'Unknown error',
-        body: response.body.isNotEmpty ? json.decode(response.body) : null,
+        statusCode: response.statusCode ?? 500,
+        message: response.statusMessage ?? 'Unknown error',
+        body: response.data,
+      );
+    } else {
+      throw ApiException(
+        statusCode: 500,
+        message: e.message ?? 'Network error',
+        body: null,
       );
     }
   }
