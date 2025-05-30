@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/drawer_widgets.dart';
 import '../pages/dashboard_page.dart';
+import '../pages/inventory_page.dart';
 import '../pages/module_pages.dart';
 
 class ERPHomePage extends StatefulWidget {

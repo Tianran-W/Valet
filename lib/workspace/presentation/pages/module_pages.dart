@@ -1,14 +1,5 @@
 import 'package:flutter/material.dart';
 
-class InventoryPage extends StatelessWidget {
-  const InventoryPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('库存管理页面'));
-  }
-}
-
 class SalesPage extends StatelessWidget {
   const SalesPage({super.key});
 
