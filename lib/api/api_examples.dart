@@ -1,9 +1,11 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
 import 'core/api_service.dart';
+import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 /// API 使用示例类
 class ApiExamples {
+  static final Logger _logger = Logger();
   /// 演示如何使用 API 服务
   static void demonstrateApiUsage() async {
     // 创建 API 服务实例
@@ -21,25 +23,25 @@ class ApiExamples {
       // 获取并存储令牌
       final token = loginResponse['token'] as String;
       apiService.updateAuthToken(token);
-      print('登录成功: $loginResponse');
+      _logger.i('登录成功: $loginResponse');
 
       // 获取当前用户信息
       final currentUser = await apiService.userApi.getCurrentUser();
-      print('当前用户: $currentUser');
+      _logger.i('当前用户: $currentUser');
 
       // 获取所有工作空间
       final workspaces = await apiService.workspaceApi.getAllWorkspaces();
-      print('工作空间列表: $workspaces');
+      _logger.i('工作空间列表: $workspaces');
 
       if (workspaces.isNotEmpty) {
         // 获取第一个工作空间的详情
         final firstWorkspaceId = workspaces[0]['id'] as String;
         final workspaceDetails = await apiService.workspaceApi.getWorkspace(firstWorkspaceId);
-        print('工作空间详情: $workspaceDetails');
+        _logger.i('工作空间详情: $workspaceDetails');
 
         // 获取工作空间成员
         final members = await apiService.workspaceApi.getWorkspaceMembers(firstWorkspaceId);
-        print('工作空间成员: $members');
+        _logger.i('工作空间成员: $members');
       }
 
       // 创建新工作空间
@@ -48,7 +50,7 @@ class ApiExamples {
         description: '这是一个新项目的工作空间',
         isPrivate: true,
       );
-      print('创建的新工作空间: $newWorkspace');
+      _logger.i('创建的新工作空间: $newWorkspace');
 
       // 邀请用户加入工作空间
       final invitation = await apiService.workspaceApi.inviteUser(
@@ -56,7 +58,7 @@ class ApiExamples {
         email: 'colleague@example.com',
         role: 'editor',
       );
-      print('邀请发送: $invitation');
+      _logger.i('邀请发送: $invitation');
 
       // 更新用户信息
       final userId = currentUser['id'] as String;
@@ -64,14 +66,14 @@ class ApiExamples {
         userId,
         {'name': '新用户名', 'avatar_url': 'https://example.com/avatar.jpg'},
       );
-      print('更新后的用户信息: $updatedUser');
+      _logger.i('更新后的用户信息: $updatedUser');
 
       // 登出
       await apiService.userApi.logout();
       apiService.clearAuthToken();
-      print('用户已登出');
+      _logger.i('用户已登出');
     } catch (e) {
-      print('错误: $e');
+      _logger.e('错误: $e');
     }
   }
 }
