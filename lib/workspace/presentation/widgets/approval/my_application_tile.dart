@@ -41,11 +41,6 @@ class MyApplicationTile extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                '申请时间: ${application.submitTime}',
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
-              ),
             ],
           ),
           const SizedBox(height: 4),

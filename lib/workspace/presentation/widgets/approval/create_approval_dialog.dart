@@ -109,9 +109,6 @@ class _CreateApprovalDialogState extends State<CreateApprovalDialog> {
       final now = DateTime.now();
       final id = 'AP${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}';
       
-      // 创建提交时间
-      final submitTime = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-      
       // 创建审批对象
       final approval = Approval(
         id: id,
@@ -120,7 +117,6 @@ class _CreateApprovalDialogState extends State<CreateApprovalDialog> {
         applicantId: '1', // 实际应用中应该从用户认证服务获取
         applicantName: '当前用户', // 实际应用中应该从用户认证服务获取
         reason: _reasonController.text.trim(),
-        submitTime: submitTime,
         status: ApprovalStatus.pending,
         currentApprover: '张经理', // 假设默认审批人
       );

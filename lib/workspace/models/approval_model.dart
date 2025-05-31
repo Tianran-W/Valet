@@ -16,9 +16,8 @@ class Approval {
   final String applicantId;
   final String applicantName;
   final String reason;
-  final String submitTime;
-  final String? approveTime;
   final ApprovalStatus status;
+  final String? approveTime;
   final String? rejectReason;
   final String? currentApprover;
 
@@ -29,9 +28,8 @@ class Approval {
     required this.applicantId,
     required this.applicantName,
     required this.reason,
-    required this.submitTime,
-    this.approveTime,
     required this.status,
+    this.approveTime,
     this.rejectReason,
     this.currentApprover,
   });
@@ -39,17 +37,16 @@ class Approval {
   // 从Map构建对象
   factory Approval.fromMap(Map<String, dynamic> map) {
     return Approval(
-      id: map['id'],
-      materialId: map['materialId'],
-      materialName: map['materialName'],
-      applicantId: map['applicantId'],
-      applicantName: map['applicantName'],
-      reason: map['reason'],
-      submitTime: map['submitTime'],
-      approveTime: map['approveTime'],
-      status: _getStatusFromString(map['status']),
-      rejectReason: map['rejectReason'],
-      currentApprover: map['currentApprover'],
+      id: map['id']?.toString() ?? map['pending']?.toString() ?? '',
+      materialId: map['materialId']?.toString() ?? '',
+      materialName: map['materialName']?.toString() ?? '',
+      applicantId: map['userId']?.toString() ?? map['applicantId']?.toString() ?? '',
+      applicantName: map['username']?.toString() ?? map['applicantName']?.toString() ?? '',
+      reason: map['approvalReason']?.toString() ?? map['reason']?.toString() ?? '',
+      status: _getStatusFromString(map['approvalStatus']?.toString() ?? ''),
+      approveTime: map['approveTime']?.toString(),
+      rejectReason: map['rejectReason']?.toString(),
+      currentApprover: map['currentApprover']?.toString(),
     );
   }
 
@@ -62,7 +59,6 @@ class Approval {
       'applicantId': applicantId,
       'applicantName': applicantName,
       'reason': reason,
-      'submitTime': submitTime,
       'approveTime': approveTime,
       'status': status.name,
       'rejectReason': rejectReason,
@@ -71,7 +67,11 @@ class Approval {
   }
 
   // 辅助方法：从字符串获取状态枚举
-  static ApprovalStatus _getStatusFromString(String statusStr) {
+  static ApprovalStatus _getStatusFromString(String? statusStr) {
+    if (statusStr == null || statusStr.isEmpty) {
+      return ApprovalStatus.pending;
+    }
+    
     switch (statusStr) {
       case '待审批':
         return ApprovalStatus.pending;

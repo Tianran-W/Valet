@@ -16,14 +16,13 @@ class ApprovalPage extends StatefulWidget {
 class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderStateMixin {
   // 标签控制器
   late TabController _tabController;
-  final List<String> _tabs = ['待我审批', '我已审批', '我发起的'];
+  final List<String> _tabs = ['待我审批', '我发起的'];
   
   // 服务实例
   late ApprovalService _approvalService;
   
   // 审批数据
   List<Approval> _approvals = [];
-  List<Approval> _approvedItems = [];
   List<Approval> _myApplications = [];
   
   // 状态管理
@@ -80,17 +79,15 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
     });
     
     try {
-      // 并行加载三个列表
-      final futures = await Future.wait([
-        _approvalService.getPendingApprovals(_currentUserId),
-        _approvalService.getApprovedItems(_currentUserId),
-        _approvalService.getMyApplications(_currentUserId),
-      ]);
+      // 加载待审批列表
+      final pendingApprovals = await _approvalService.getPendingApprovals(_currentUserId);
+      
+      // 使用示例数据作为我发起的申请
+      final sampleApplications = _generateSampleApplications();
       
       setState(() {
-        _approvals = futures[0];
-        _approvedItems = futures[1];
-        _myApplications = futures[2];
+        _approvals = pendingApprovals;
+        _myApplications = sampleApplications;
         _isLoading = false;
       });
     } catch (e) {
@@ -115,6 +112,44 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
         );
       }
     }
+  }
+
+  // 生成示例申请数据
+  List<Approval> _generateSampleApplications() {
+    return [
+      Approval(
+        id: '1001',
+        materialId: 'M001',
+        materialName: '办公椅',
+        applicantId: '1',
+        applicantName: '张三',
+        reason: '由于项目紧急，需要申请今晚加班到22:00完成开发任务',
+        status: ApprovalStatus.pending,
+        currentApprover: '李四',
+      ),
+      Approval(
+        id: '1002',
+        materialId: 'M002', 
+        materialName: '年假',
+        applicantId: '1',
+        applicantName: '张三',
+        reason: '申请12月20日-12月25日年假，共5天',
+        status: ApprovalStatus.approved,
+        approveTime: DateTime.now().subtract(const Duration(hours: 12)).toString(),
+        currentApprover: '王五',
+      ),
+      Approval(
+        id: '1003',
+        materialId: 'M003',
+        materialName: '办公用品',
+        applicantId: '1', 
+        applicantName: '张三',
+        reason: '申请采购开发团队办公椅10张，预算8000元',
+        status: ApprovalStatus.rejected,
+        rejectReason: '预算超支，请重新评估需求',
+        currentApprover: '赵六',
+      ),
+    ];
   }
 
   @override
@@ -230,7 +265,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
                     controller: _tabController,
                     children: [
                       _buildPendingApprovals(),
-                      _buildApprovedItems(),
                       _buildMyApplications(),
                     ],
                   ),
@@ -250,13 +284,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
           value: _approvals.length.toString(),
           icon: Icons.pending_actions,
           color: Colors.blue,
-        ),
-        const SizedBox(width: 16),
-        ApprovalStatCard(
-          title: '已审批',
-          value: _approvedItems.length.toString(),
-          icon: Icons.check_circle_outline,
-          color: Colors.green,
         ),
         const SizedBox(width: 16),
         ApprovalStatCard(
@@ -283,26 +310,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
                 return PendingApprovalTile(
                   approval: approval,
                   onApproveReject: _showApprovalDialog,
-                  onTap: _showApprovalDetailDialog,
-                );
-              },
-            ),
-          );
-  }
-
-  // 已审批列表
-  Widget _buildApprovedItems() {
-    return _approvedItems.isEmpty
-        ? const Center(child: Text('暂无已审批项目'))
-        : Card(
-            elevation: 1,
-            child: ListView.separated(
-              itemCount: _approvedItems.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final approval = _approvedItems[index];
-                return ApprovedItemTile(
-                  approval: approval,
                   onTap: _showApprovalDetailDialog,
                 );
               },

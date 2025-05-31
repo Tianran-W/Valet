@@ -29,7 +29,6 @@ class ApprovalDetailDialog extends StatelessWidget {
             DetailRowWidget(label: '申请用户名', value: approval.applicantName),
             DetailRowWidget(label: '申请原因', value: approval.reason),
             DetailRowWidget(label: '申请类型', value: '物资借用申请'),
-            DetailRowWidget(label: '提交时间', value: approval.submitTime),
             if (approval.status == ApprovalStatus.approved || approval.status == ApprovalStatus.rejected)
               DetailRowWidget(label: '审批时间', value: approval.approveTime),
             DetailRowWidget(label: '审批状态', value: approval.status.name),

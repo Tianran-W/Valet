@@ -47,11 +47,6 @@ class ApprovedItemTile extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '申请时间: ${approval.submitTime}',
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
-          ),
-          const SizedBox(height: 4),
-          Text(
             '审批时间: ${approval.approveTime}',
             style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
           ),
