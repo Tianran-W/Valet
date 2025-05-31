@@ -3,6 +3,7 @@
 /// 物品使用状态枚举
 enum InventoryStatus {
   inStock('在库可借'),
+  pending('审批中'),
   onLoan('已借出'),
   maintenance('维修中'),
   scrapped('已报废');
@@ -14,6 +15,7 @@ enum InventoryStatus {
   static InventoryStatus fromString(String status) {
     return switch (status) {
       '在库可借' => InventoryStatus.inStock,
+      '审批中' => InventoryStatus.pending,
       '已借出' => InventoryStatus.onLoan,
       '维修中' => InventoryStatus.maintenance,
       '已报废' => InventoryStatus.scrapped,

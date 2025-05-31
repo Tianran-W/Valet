@@ -79,6 +79,22 @@ class WorkspaceApi {
     return true;
   }
   
+  /// 归还物品
+  /// [materialId]: 物品ID
+  /// [userId]: 用户ID
+  Future<bool> returnItem({
+    required int materialId,
+    required int userId,
+  }) async {
+    final Map<String, dynamic> body = {
+      'materialId': materialId,
+      'userId': userId,
+    };
+    
+    await _apiClient.post('/returnMaterial', body: body);
+    return true;
+  }
+  
   /// 获取指定用户的借用记录
   /// [userId]: 用户ID
   Future<List<int>> getBorrowingsByUserId(int userId) async {

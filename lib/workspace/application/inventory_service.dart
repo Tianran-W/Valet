@@ -128,4 +128,27 @@ class InventoryService {
       throw Exception('获取用户借用记录失败: $e');
     }
   }
+
+  /// 归还物品
+  /// [materialId]: 物品ID
+  /// [userId]: 用户ID
+  Future<void> returnItem({
+    required int materialId,
+    required int userId,
+  }) async {
+    try {
+      logger.info('正在归还物品: $materialId', tag: _tag);
+      logger.debug('归还参数: userId=$userId', tag: _tag);
+      
+      await _apiService.workspaceApi.returnItem(
+        materialId: materialId,
+        userId: userId,
+      );
+      
+      logger.debug('成功归还物品: $materialId', tag: _tag);
+    } catch (e) {
+      logger.error('归还物品失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('归还物品失败: $e');
+    }
+  }
 }

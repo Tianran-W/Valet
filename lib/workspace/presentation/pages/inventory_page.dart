@@ -5,8 +5,6 @@ import 'package:valet/api/core/logger_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/presentation/widgets/inventory/inventory_widgets.dart';
-import 'package:valet/workspace/presentation/widgets/inventory/add_item_dialog.dart';
-import 'package:valet/workspace/presentation/widgets/inventory/borrow_item_dialog.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -234,11 +232,63 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   // 显示归还物品对话框
-  void _showReturnItemDialog(Item item) {
-    // 在实际应用中，这里会实现归还功能
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('归还物品: ${item.name} (功能开发中)')),
+  Future<void> _showReturnItemDialog(Item item) async {
+    // 只有借出的物品才能归还
+    if (item.status != InventoryStatus.onLoan) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('物品: ${item.name} 当前状态为${item.status.displayName}，无法归还'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final result = await showDialog(
+      context: context,
+      builder: (context) => ReturnItemDialog(
+        item: item,
+        userId: _currentUserId,
+      ),
     );
+    
+    if (result != null && mounted) {
+      try {
+        // 显示加载中提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('正在处理归还请求...')),
+        );
+        
+        // 归还物品
+        await _inventoryService.returnItem(
+          materialId: result['materialId'],
+          userId: result['userId'],
+        );
+        
+        if (mounted) {
+          // 显示成功提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('归还成功'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          
+          // 重新加载数据
+          _loadInventoryItems();
+        }
+      } catch (e) {
+        if (mounted) {
+          // 显示错误提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('归还失败: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   // 物品详情行，使用DetailRowWidget组件

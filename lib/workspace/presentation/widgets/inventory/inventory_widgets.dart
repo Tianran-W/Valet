@@ -6,3 +6,6 @@ export 'inventory_filters.dart';
 export 'inventory_stats.dart';
 export 'inventory_item_list.dart';
 export 'inventory_item_tile.dart';
+export 'add_item_dialog.dart';
+export 'borrow_item_dialog.dart';
+export 'return_item_dialog.dart';
