@@ -37,7 +37,11 @@ class _ApprovalActionDialogState extends State<ApprovalActionDialog> {
         children: [
           Text('申请编号: ${widget.approval.id}'),
           const SizedBox(height: 8),
-          Text('申请标题: ${widget.approval.title}'),
+          Text('物资名称: ${widget.approval.materialName}'),
+          const SizedBox(height: 8),
+          Text('申请人: ${widget.approval.applicantName}'),
+          const SizedBox(height: 8),
+          Text('申请原因: ${widget.approval.reason}'),
           const SizedBox(height: 16),
           TextField(
             controller: _remarkController,

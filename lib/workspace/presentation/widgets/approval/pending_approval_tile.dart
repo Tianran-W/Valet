@@ -19,23 +19,8 @@ class PendingApprovalTile extends StatelessWidget {
     return ListTile(
       title: Row(
         children: [
-          Text(approval.title),
+          Text('${approval.materialName} (ID: ${approval.materialId})'),
           const SizedBox(width: 8),
-          if (approval.urgent == true)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.red.shade100,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '加急',
-                style: TextStyle(
-                  color: Colors.red.shade700,
-                  fontSize: 12,
-                ),
-              ),
-            ),
         ],
       ),
       subtitle: Column(
@@ -51,7 +36,7 @@ class PendingApprovalTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  '借用申请',
+                  '物资借用申请',
                   style: TextStyle(
                     color: Colors.blue.shade700,
                     fontSize: 12,
@@ -60,12 +45,7 @@ class PendingApprovalTile extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '申请人: ${approval.applicant}',
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '部门: ${approval.department}',
+                '申请人: ${approval.applicantName}',
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
               ),
             ],
@@ -74,6 +54,13 @@ class PendingApprovalTile extends StatelessWidget {
           Text(
             '申请时间: ${approval.submitTime}',
             style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '申请原因: ${approval.reason}',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
           ),
         ],
       ),

@@ -16,16 +16,14 @@ class CreateApprovalDialog extends StatefulWidget {
 
 class _CreateApprovalDialogState extends State<CreateApprovalDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _departmentController = TextEditingController();
+  final _materialIdController = TextEditingController();
+  final _materialNameController = TextEditingController();
   final _reasonController = TextEditingController();
-  
-  bool _isUrgent = false;
   
   @override
   void dispose() {
-    _titleController.dispose();
-    _departmentController.dispose();
+    _materialIdController.dispose();
+    _materialNameController.dispose();
     _reasonController.dispose();
     super.dispose();
   }
@@ -40,67 +38,53 @@ class _CreateApprovalDialogState extends State<CreateApprovalDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 审批标题
+              // 物资ID
               TextFormField(
-                controller: _titleController,
+                controller: _materialIdController,
                 decoration: const InputDecoration(
-                  labelText: '审批标题 *',
-                  hintText: '请输入审批标题',
+                  labelText: '物资ID *',
+                  hintText: '请输入物资ID',
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入审批标题';
+                    return '请输入物资ID';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               
-              // 所属部门
+              // 物资名称
               TextFormField(
-                controller: _departmentController,
+                controller: _materialNameController,
                 decoration: const InputDecoration(
-                  labelText: '所属部门 *',
-                  hintText: '请输入所属部门',
+                  labelText: '物资名称 *',
+                  hintText: '请输入物资名称',
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入所属部门';
+                    return '请输入物资名称';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 16),
               
-              // 申请理由
+              // 申请原因
               TextFormField(
                 controller: _reasonController,
                 maxLines: 3,
                 decoration: const InputDecoration(
-                  labelText: '申请理由 *',
-                  hintText: '请输入申请理由',
+                  labelText: '申请原因 *',
+                  hintText: '请输入申请原因',
                   alignLabelWithHint: true,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '请输入申请理由';
+                    return '请输入申请原因';
                   }
                   return null;
                 },
-              ),
-              const SizedBox(height: 16),
-              
-              // 加急选项
-              SwitchListTile(
-                title: const Text('加急审批'),
-                subtitle: const Text('加急审批将优先处理'),
-                value: _isUrgent,
-                onChanged: (value) {
-                  setState(() {
-                    _isUrgent = value;
-                  });
-                },
-                contentPadding: EdgeInsets.zero,
               ),
             ],
           ),
@@ -131,12 +115,13 @@ class _CreateApprovalDialogState extends State<CreateApprovalDialog> {
       // 创建审批对象
       final approval = Approval(
         id: id,
-        title: _titleController.text.trim(),
-        applicant: '当前用户', // 实际应用中应该从用户认证服务获取
-        department: _departmentController.text.trim(),
+        materialId: _materialIdController.text.trim(),
+        materialName: _materialNameController.text.trim(),
+        applicantId: '1', // 实际应用中应该从用户认证服务获取
+        applicantName: '当前用户', // 实际应用中应该从用户认证服务获取
+        reason: _reasonController.text.trim(),
         submitTime: submitTime,
-        status: ApprovalStatus.processing,
-        urgent: _isUrgent,
+        status: ApprovalStatus.pending,
         currentApprover: '张经理', // 假设默认审批人
       );
       

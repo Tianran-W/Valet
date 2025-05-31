@@ -16,11 +16,11 @@ class MyApplicationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool pending = application.status == ApprovalStatus.processing;
+    final bool pending = application.status == ApprovalStatus.pending;
     final bool approved = application.status == ApprovalStatus.approved;
     
     return ListTile(
-      title: Text(application.title),
+      title: Text('${application.materialName} (ID: ${application.materialId})'),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -34,7 +34,7 @@ class MyApplicationTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  '借用申请',
+                  '物资借用申请',
                   style: TextStyle(
                     color: Colors.blue.shade700,
                     fontSize: 12,
@@ -47,6 +47,13 @@ class MyApplicationTile extends StatelessWidget {
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
               ),
             ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '申请原因: ${application.reason}',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
           ),
           const SizedBox(height: 4),
           if (pending)

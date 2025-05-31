@@ -41,10 +41,11 @@ class _ApprovalSearchDialogState extends State<ApprovalSearchDialog> {
         _filteredApprovals = List.from(widget.approvals);
       } else {
         _filteredApprovals = widget.approvals.where((approval) {
-          return approval.title.toLowerCase().contains(query) ||
-                 approval.id.toLowerCase().contains(query) ||
-                 (approval.applicant?.toLowerCase().contains(query) ?? false) ||
-                 (approval.department?.toLowerCase().contains(query) ?? false);
+          return approval.materialName.toLowerCase().contains(query) ||
+                 approval.materialId.toLowerCase().contains(query) ||
+                 approval.applicantName.toLowerCase().contains(query) ||
+                 approval.reason.toLowerCase().contains(query) ||
+                 approval.id.toLowerCase().contains(query);
         }).toList();
       }
     });
@@ -89,8 +90,8 @@ class _ApprovalSearchDialogState extends State<ApprovalSearchDialog> {
                         itemBuilder: (context, index) {
                           final approval = _filteredApprovals[index];
                           return ListTile(
-                            title: Text(approval.title),
-                            subtitle: Text('${approval.id} - ${approval.department ?? ''}'),
+                            title: Text('${approval.materialName} (ID: ${approval.materialId})'),
+                            subtitle: Text('${approval.id} - 申请人: ${approval.applicantName}'),
                             trailing: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -140,8 +141,6 @@ class _ApprovalSearchDialogState extends State<ApprovalSearchDialog> {
         return Colors.red;
       case ApprovalStatus.pending:
         return Colors.blue;
-      case ApprovalStatus.processing:
-        return Colors.orange;
     }
   }
 }

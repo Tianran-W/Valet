@@ -23,22 +23,18 @@ class ApprovalDetailDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             DetailRowWidget(label: '申请编号', value: approval.id),
-            DetailRowWidget(label: '申请标题', value: approval.title),
-            if (approval.applicant != null)
-              DetailRowWidget(label: '申请人', value: approval.applicant),
-            if (approval.department != null)
-              DetailRowWidget(label: '所属部门', value: approval.department),
-            DetailRowWidget(label: '申请类型', value: '借用申请'),
+            DetailRowWidget(label: '物资ID', value: approval.materialId),
+            DetailRowWidget(label: '物资名称', value: approval.materialName),
+            DetailRowWidget(label: '申请用户ID', value: approval.applicantId),
+            DetailRowWidget(label: '申请用户名', value: approval.applicantName),
+            DetailRowWidget(label: '申请原因', value: approval.reason),
+            DetailRowWidget(label: '申请类型', value: '物资借用申请'),
             DetailRowWidget(label: '提交时间', value: approval.submitTime),
             if (approval.status == ApprovalStatus.approved || approval.status == ApprovalStatus.rejected)
               DetailRowWidget(label: '审批时间', value: approval.approveTime),
             DetailRowWidget(label: '审批状态', value: approval.status.name),
             if (approval.status == ApprovalStatus.rejected && approval.rejectReason != null)
               DetailRowWidget(label: '驳回原因', value: approval.rejectReason),
-            if (approval.urgent == true)
-              DetailRowWidget(label: '紧急程度', value: '加急'),
-            if (approval.status == ApprovalStatus.processing && approval.currentApprover != null)
-              DetailRowWidget(label: '当前审批人', value: approval.currentApprover),
           ],
         ),
       ),

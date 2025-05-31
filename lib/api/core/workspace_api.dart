@@ -117,25 +117,15 @@ class WorkspaceApi {
   /// 获取待审批列表
   /// [userId]: 当前用户ID
   Future<List<Approval>> getPendingApprovals(int userId) async {
-    try {
-      final List<dynamic> response = await _apiClient.get('/approval/pending/$userId');
-      return response.map((json) => Approval.fromMap(json)).toList();
-    } catch (e) {
-      logger.error('获取待审批列表失败: $e');
-      throw Exception('获取待审批列表失败: $e');
-    }
+    final List<dynamic> response = await _apiClient.get('/admin/getApprovalRecord');
+    return response.map((json) => Approval.fromMap(json)).toList();
   }
 
   /// 获取已审批列表  
   /// [userId]: 当前用户ID
   Future<List<Approval>> getApprovedItems(int userId) async {
-    try {
-      final List<dynamic> response = await _apiClient.get('/approval/approved/$userId');
-      return response.map((json) => Approval.fromMap(json)).toList();
-    } catch (e) {
-      logger.error('获取已审批列表失败: $e');
-      throw Exception('获取已审批列表失败: $e');
-    }
+    final List<dynamic> response = await _apiClient.get('/approval/approved/$userId');
+    return response.map((json) => Approval.fromMap(json)).toList();
   }
 
   /// 获取我发起的审批申请

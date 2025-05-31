@@ -17,7 +17,7 @@ class ApprovedItemTile extends StatelessWidget {
     final bool approved = approval.status == ApprovalStatus.approved;
     
     return ListTile(
-      title: Text(approval.title),
+      title: Text('${approval.materialName} (ID: ${approval.materialId})'),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -31,7 +31,7 @@ class ApprovedItemTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  '借用申请',
+                  '物资借用申请',
                   style: TextStyle(
                     color: Colors.blue.shade700,
                     fontSize: 12,
@@ -40,12 +40,7 @@ class ApprovedItemTile extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '申请人: ${approval.applicant}',
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '部门: ${approval.department}',
+                '申请人: ${approval.applicantName}',
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
               ),
             ],
