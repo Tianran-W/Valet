@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/inventory_model.dart';
+import 'package:valet/workspace/models/inventory_model.dart';
 import 'stat_card.dart';
 
 /// 库存统计组件

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'workspace/presentation/home/erp_home_page.dart';
+import 'package:valet/workspace/presentation/home/erp_home_page.dart';
 
 void main() {
   runApp(const MyApp());

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../models/inventory_model.dart';
-import '../../models/item_examples.dart';
-import '../widgets/inventory/inventory_widgets.dart';
+import 'package:valet/workspace/models/inventory_model.dart';
+import 'package:valet/workspace/models/item_examples.dart';
+import 'package:valet/workspace/presentation/widgets/inventory/inventory_widgets.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});

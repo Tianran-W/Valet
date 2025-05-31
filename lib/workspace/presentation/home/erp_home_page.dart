@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../widgets/drawer_widgets.dart';
-import '../pages/dashboard_page.dart';
-import '../pages/inventory_page.dart';
-import '../pages/module_pages.dart';
+import 'package:valet/workspace/presentation/widgets/drawer_widgets.dart';
+import 'package:valet/workspace/presentation/pages/dashboard_page.dart';
+import 'package:valet/workspace/presentation/pages/inventory_page.dart';
+import 'package:valet/workspace/presentation/pages/module_pages.dart';
 
 class ERPHomePage extends StatefulWidget {
   const ERPHomePage({super.key, required this.title});

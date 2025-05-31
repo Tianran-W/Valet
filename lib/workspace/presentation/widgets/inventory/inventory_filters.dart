@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/inventory_model.dart';
+import 'package:valet/workspace/models/inventory_model.dart';
 
 /// 库存过滤组件
 class InventoryFilters extends StatelessWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../models/inventory_model.dart';
+import 'package:valet/workspace/models/inventory_model.dart';
 import 'inventory_item_tile.dart';
 
 /// 库存物品列表组件

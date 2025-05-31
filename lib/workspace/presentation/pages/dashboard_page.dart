@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/dashboard_widgets.dart';
+import 'package:valet/workspace/presentation/widgets/dashboard_widgets.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
