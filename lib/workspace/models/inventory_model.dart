@@ -72,4 +72,32 @@ class Item {
     required this.lastUpdate,
     this.borrowedBy,
   });
+  
+  /// 从JSON映射创建Item实例
+  factory Item.fromJson(Map<String, dynamic> json) {
+    return Item(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      category: ProductCategory.fromString(json['category'] as String),
+      price: (json['price'] as num).toDouble(),
+      quantity: json['quantity'] as int,
+      status: InventoryStatus.fromString(json['status'] as String),
+      lastUpdate: json['last_update'] as String,
+      borrowedBy: json['borrowed_by'] as String?,
+    );
+  }
+  
+  /// 将Item实例转换为JSON映射
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category.displayName,
+      'price': price,
+      'quantity': quantity,
+      'status': status.displayName,
+      'last_update': lastUpdate,
+      if (borrowedBy != null) 'borrowed_by': borrowedBy,
+    };
+  }
 }

@@ -36,7 +36,7 @@ class InventoryFilters extends StatelessWidget {
           child: TextField(
             controller: searchController,
             decoration: InputDecoration(
-              hintText: '搜索商品名称或ID',
+              hintText: '搜索物资名称或ID',
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -52,7 +52,7 @@ class InventoryFilters extends StatelessWidget {
         Expanded(
           child: DropdownButtonFormField<ProductCategory>(
             decoration: InputDecoration(
-              labelText: '商品分类',
+              labelText: '物资分类',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),

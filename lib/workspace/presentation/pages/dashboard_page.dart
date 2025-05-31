@@ -51,7 +51,7 @@ class DashboardPage extends StatelessWidget {
             children: [
               Expanded(
                 child: DashboardCard(
-                  title: '库存商品',
+                  title: '库存物资',
                   value: '3,452',
                   icon: Icons.inventory_2,
                   color: Colors.green,

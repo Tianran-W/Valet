@@ -22,7 +22,7 @@ class InventoryItemList extends StatelessWidget {
     return Card(
       elevation: 1,
       child: items.isEmpty
-          ? const Center(child: Text('没有找到匹配的商品'))
+          ? const Center(child: Text('没有找到匹配的物资'))
           : ListView.separated(
               itemCount: items.length,
               separatorBuilder: (context, index) => const Divider(height: 1),

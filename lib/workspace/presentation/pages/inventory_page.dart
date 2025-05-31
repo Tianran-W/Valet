@@ -144,7 +144,7 @@ class _InventoryPageState extends State<InventoryPage> {
                     FilledButton.icon(
                       onPressed: _showAddItemDialog,
                       icon: const Icon(Icons.add),
-                      label: const Text('添加商品'),
+                      label: const Text('添加物资'),
                     ),
                   ],
                 ),
