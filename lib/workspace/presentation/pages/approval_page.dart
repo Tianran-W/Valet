@@ -19,20 +19,11 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
   List<Approval> _approvals = [];
   List<Approval> _approvedItems = [];
   List<Approval> _myApplications = [];
-  
-  // 过滤数据
-  List<Approval> _filteredApprovals = [];
-  List<Approval> _filteredApprovedItems = [];
-  List<Approval> _filteredMyApplications = [];
-  List<ApprovalType> _selectedTypes = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
-    
-    // 默认选择所有类型
-    _selectedTypes = List.from(ApprovalType.values);
     
     // 加载示例数据
     _loadSampleData();
@@ -49,26 +40,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
     _approvals = ApprovalSampleData.getPendingApprovals();
     _approvedItems = ApprovalSampleData.getApprovedItems();
     _myApplications = ApprovalSampleData.getMyApplications();
-    
-    // 应用过滤器
-    _applyFilters();
-  }
-  
-  // 应用过滤器
-  void _applyFilters() {
-    setState(() {
-      _filteredApprovals = _approvals.where(
-        (approval) => _selectedTypes.contains(approval.type)
-      ).toList();
-      
-      _filteredApprovedItems = _approvedItems.where(
-        (approval) => _selectedTypes.contains(approval.type)
-      ).toList();
-      
-      _filteredMyApplications = _myApplications.where(
-        (approval) => _selectedTypes.contains(approval.type)
-      ).toList();
-    });
   }
 
   @override
@@ -134,20 +105,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
             
             const SizedBox(height: 16),
             
-            // 过滤器
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: ApprovalFilterWidget(
-                selectedTypes: _selectedTypes,
-                onFilterChanged: (types) {
-                  setState(() {
-                    _selectedTypes = types;
-                    _applyFilters();
-                  });
-                },
-              ),
-            ),
-            
             // 标签页内容
             Expanded(
               child: TabBarView(
@@ -171,21 +128,21 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
       children: [
         ApprovalStatCard(
           title: '待审批',
-          value: '${_filteredApprovals.length}/${_approvals.length}',
+          value: _approvals.length.toString(),
           icon: Icons.pending_actions,
           color: Colors.blue,
         ),
         const SizedBox(width: 16),
         ApprovalStatCard(
           title: '已审批',
-          value: '${_filteredApprovedItems.length}/${_approvedItems.length}',
+          value: _approvedItems.length.toString(),
           icon: Icons.check_circle_outline,
           color: Colors.green,
         ),
         const SizedBox(width: 16),
         ApprovalStatCard(
           title: '我发起的',
-          value: '${_filteredMyApplications.length}/${_myApplications.length}',
+          value: _myApplications.length.toString(),
           icon: Icons.send,
           color: Colors.purple,
         ),
@@ -195,15 +152,15 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
 
   // 待我审批列表
   Widget _buildPendingApprovals() {
-    return _filteredApprovals.isEmpty
+    return _approvals.isEmpty
         ? const Center(child: Text('暂无待审批项目'))
         : Card(
             elevation: 1,
             child: ListView.separated(
-              itemCount: _filteredApprovals.length,
+              itemCount: _approvals.length,
               separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
-                final approval = _filteredApprovals[index];
+                final approval = _approvals[index];
                 return PendingApprovalTile(
                   approval: approval,
                   onApproveReject: _showApprovalDialog,
@@ -216,15 +173,15 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
 
   // 已审批列表
   Widget _buildApprovedItems() {
-    return _filteredApprovedItems.isEmpty
+    return _approvedItems.isEmpty
         ? const Center(child: Text('暂无已审批项目'))
         : Card(
             elevation: 1,
             child: ListView.separated(
-              itemCount: _filteredApprovedItems.length,
+              itemCount: _approvedItems.length,
               separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
-                final approval = _filteredApprovedItems[index];
+                final approval = _approvedItems[index];
                 return ApprovedItemTile(
                   approval: approval,
                   onTap: _showApprovalDetailDialog,
@@ -236,15 +193,15 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
 
   // 我发起的申请列表
   Widget _buildMyApplications() {
-    return _filteredMyApplications.isEmpty
+    return _myApplications.isEmpty
         ? const Center(child: Text('暂无发起的申请'))
         : Card(
             elevation: 1,
             child: ListView.separated(
-              itemCount: _filteredMyApplications.length,
+              itemCount: _myApplications.length,
               separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
-                final approval = _filteredMyApplications[index];
+                final approval = _myApplications[index];
                 return MyApplicationTile(
                   application: approval,
                   onTap: _showMyApplicationDetailDialog,
