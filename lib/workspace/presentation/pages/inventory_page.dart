@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:valet/api/core/api_service.dart';
+import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
-import 'package:valet/workspace/models/item_examples.dart';
 import 'package:valet/workspace/presentation/widgets/inventory/inventory_widgets.dart';
 
 class InventoryPage extends StatefulWidget {
@@ -26,8 +27,16 @@ class _InventoryPageState extends State<InventoryPage> {
   // 贵重物品过滤
   bool? _isValuableFilter;
   
-  // 示例物品数据
-  final List<Item> _inventoryItems = ItemExamples.getAllItems();
+  // API服务
+  late InventoryService _inventoryService;
+  
+  // 物品数据
+  List<Item> _inventoryItems = [];
+  
+  // 加载状态
+  bool _isLoading = false;
+  bool _hasError = false;
+  String _errorMessage = "";
 
   // 获取过滤后的物品列表
   List<Item> get _filteredItems {
@@ -127,6 +136,59 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // 初始化API服务
+    final apiService = ApiService.create(baseUrl: 'https://api.valet.example.com');
+    _inventoryService = InventoryService(apiService);
+    
+    // 加载数据
+    _loadInventoryItems();
+  }
+  
+  // 从API加载物品数据
+  Future<void> _loadInventoryItems() async {
+    if (_isLoading) return;
+    
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+      _errorMessage = "";
+    });
+    
+    try {
+      final items = await _inventoryService.getInventoryItems(
+        category: _categoryQuery.isEmpty ? null : _categoryQuery,
+        status: _selectedStatus?.displayName,
+      );
+      
+      setState(() {
+        _inventoryItems = items;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+        _errorMessage = e.toString();
+      });
+      
+      // 显示错误提示
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('获取物品列表失败: $_errorMessage'),
+          backgroundColor: Colors.red,
+          action: SnackBarAction(
+            label: '重试',
+            onPressed: _loadInventoryItems,
+            textColor: Colors.white,
+          ),
+        ),
+      );
+    }
+  }
+  
+  @override
   void dispose() {
     _searchController.dispose();
     _categoryController.dispose();
@@ -188,6 +250,8 @@ class _InventoryPageState extends State<InventoryPage> {
                 setState(() {
                   _categoryQuery = value;
                 });
+                // 当分类更改时重新加载数据
+                _loadInventoryItems();
               },
               selectedStatus: _selectedStatus,
               statusOptions: _statusOptions,
@@ -195,6 +259,8 @@ class _InventoryPageState extends State<InventoryPage> {
                 setState(() {
                   _selectedStatus = value;
                 });
+                // 当状态更改时重新加载数据
+                _loadInventoryItems();
               },
               isValuableFilter: _isValuableFilter,
               onIsValuableChanged: (value) {
@@ -209,7 +275,7 @@ class _InventoryPageState extends State<InventoryPage> {
             InventoryStats(items: _inventoryItems),
             const SizedBox(height: 24),
             
-            // 列表标题
+            // 列表标题和刷新按钮
             Row(
               children: [
                 Text(
@@ -223,24 +289,49 @@ class _InventoryPageState extends State<InventoryPage> {
                     color: Colors.grey,
                   ),
                 ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  tooltip: '刷新列表',
+                  onPressed: _loadInventoryItems,
+                ),
               ],
             ),
             const SizedBox(height: 12),
             
             // 库存列表
             Expanded(
-              child: InventoryItemList(
-                items: _filteredItems,
-                onItemTap: _showItemDetails,
-                onItemBorrow: _showBorrowItemDialog,
-                onItemReturn: _showReturnItemDialog,
-                onItemMoreActions: (item) {
-                  // 显示更多操作菜单
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('更多操作: ${item.name}')),
-                  );
-                },
-              ),
+              child: _isLoading 
+              ? const Center(child: CircularProgressIndicator())
+              : _hasError
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text('加载失败: $_errorMessage'),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _loadInventoryItems,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('重试'),
+                        ),
+                      ],
+                    ),
+                  )
+                : InventoryItemList(
+                    items: _filteredItems,
+                    onItemTap: _showItemDetails,
+                    onItemBorrow: _showBorrowItemDialog,
+                    onItemReturn: _showReturnItemDialog,
+                    onItemMoreActions: (item) {
+                      // 显示更多操作菜单
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('更多操作: ${item.name}')),
+                      );
+                    },
+                  ),
             ),
           ],
         ),
