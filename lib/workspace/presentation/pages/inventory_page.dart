@@ -348,18 +348,19 @@ class _InventoryPageState extends State<InventoryPage> {
         _errorMessage = e.toString();
       });
       
-      // 显示错误提示
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('获取物品列表失败: $_errorMessage'),
-          backgroundColor: Colors.red,
-          action: SnackBarAction(
-            label: '重试',
-            onPressed: _loadInventoryItems,
-            textColor: Colors.white,
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('获取物品列表失败: $_errorMessage'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: '重试',
+              onPressed: _loadInventoryItems,
+              textColor: Colors.white,
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
   
