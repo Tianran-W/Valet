@@ -34,6 +34,7 @@ class Item {
   final InventoryStatus status;
   final bool isValuable;
   final String? serialNumber;
+  final int? usageLimit; 
 
   const Item({
     required this.id,
@@ -43,6 +44,7 @@ class Item {
     required this.status,
     this.isValuable = false,
     this.serialNumber,
+    this.usageLimit, 
   });
   
   /// 从JSON映射创建Item实例
@@ -55,6 +57,7 @@ class Item {
       status: InventoryStatus.fromString(json['status']?.toString() ?? ''),
       isValuable: json['isExpensive'] == 1 || json['isExpensive'] == true,
       serialNumber: json['snCode']?.toString(),
+      usageLimit: json['usageLimit'] is int ? json['usageLimit'] : null,
     );
   }
   
@@ -68,6 +71,7 @@ class Item {
       'status': status.displayName,
       'is_valuable': isValuable,
       if (serialNumber != null) 'serial_number': serialNumber,
+      if (usageLimit != null) 'usage_limit': usageLimit,
     };
   }
 }
