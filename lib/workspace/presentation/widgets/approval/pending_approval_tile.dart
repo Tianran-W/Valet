@@ -51,7 +51,7 @@ class PendingApprovalTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  approval.type.name,
+                  '借用申请',
                   style: TextStyle(
                     color: Colors.blue.shade700,
                     fontSize: 12,

@@ -44,8 +44,7 @@ class _ApprovalSearchDialogState extends State<ApprovalSearchDialog> {
           return approval.title.toLowerCase().contains(query) ||
                  approval.id.toLowerCase().contains(query) ||
                  (approval.applicant?.toLowerCase().contains(query) ?? false) ||
-                 (approval.department?.toLowerCase().contains(query) ?? false) ||
-                 approval.type.name.toLowerCase().contains(query);
+                 (approval.department?.toLowerCase().contains(query) ?? false);
         }).toList();
       }
     });
@@ -91,7 +90,7 @@ class _ApprovalSearchDialogState extends State<ApprovalSearchDialog> {
                           final approval = _filteredApprovals[index];
                           return ListTile(
                             title: Text(approval.title),
-                            subtitle: Text('${approval.id} - ${approval.type.name}'),
+                            subtitle: Text('${approval.id} - ${approval.department ?? ''}'),
                             trailing: Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,

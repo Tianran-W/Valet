@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:valet/api/core/api_service.dart';
+import 'package:valet/workspace/application/approval_service.dart';
 import 'package:valet/workspace/models/approval_model.dart';
 import 'package:valet/workspace/presentation/widgets/approval/approval_widgets.dart';
 
@@ -15,18 +18,32 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
   late TabController _tabController;
   final List<String> _tabs = ['待我审批', '我已审批', '我发起的'];
   
+  // 服务实例
+  late ApprovalService _approvalService;
+  
   // 审批数据
   List<Approval> _approvals = [];
   List<Approval> _approvedItems = [];
   List<Approval> _myApplications = [];
+  
+  // 状态管理
+  bool _isLoading = false;
+  bool _hasError = false;
+  String _errorMessage = "";
+  
+  // 用户ID（实际应用中应该从用户认证服务获取）
+  final int _currentUserId = 1;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabs.length, vsync: this);
     
-    // 加载示例数据
-    _loadSampleData();
+    // 初始化服务
+    _initializeService();
+    
+    // 加载真实数据
+    _loadApprovalData();
   }
 
   @override
@@ -35,11 +52,69 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
     super.dispose();
   }
   
-  // 加载示例数据
-  void _loadSampleData() {
-    _approvals = ApprovalSampleData.getPendingApprovals();
-    _approvedItems = ApprovalSampleData.getApprovedItems();
-    _myApplications = ApprovalSampleData.getMyApplications();
+  // 初始化服务
+  void _initializeService() {
+    try {
+      // 从环境变量读取后端URL
+      final backendUrl = dotenv.env['BACKEND_URL'] ?? '';
+      
+      // 创建API服务实例
+      final apiService = ApiService.create(baseUrl: backendUrl);
+      _approvalService = ApprovalService(apiService);
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+        _errorMessage = "初始化服务失败: $e";
+      });
+    }
+  }
+  
+  // 从API加载审批数据
+  Future<void> _loadApprovalData() async {
+    if (_isLoading) return;
+    
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+      _errorMessage = "";
+    });
+    
+    try {
+      // 并行加载三个列表
+      final futures = await Future.wait([
+        _approvalService.getPendingApprovals(_currentUserId),
+        _approvalService.getApprovedItems(_currentUserId),
+        _approvalService.getMyApplications(_currentUserId),
+      ]);
+      
+      setState(() {
+        _approvals = futures[0];
+        _approvedItems = futures[1];
+        _myApplications = futures[2];
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+        _errorMessage = e.toString();
+      });
+      
+      // 显示错误信息
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('加载数据失败: $e'),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: '重试',
+              textColor: Colors.white,
+              onPressed: _loadApprovalData,
+            ),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -61,25 +136,29 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.refresh),
+                      icon: _isLoading 
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.refresh),
                       tooltip: '刷新数据',
-                      onPressed: () {
-                        setState(() {
-                          _loadSampleData();
-                        });
+                      onPressed: _isLoading ? null : () {
+                        _loadApprovalData();
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('数据已刷新')),
+                          const SnackBar(content: Text('正在刷新数据...')),
                         );
                       },
                     ),
                     IconButton(
                       icon: const Icon(Icons.search),
                       tooltip: '搜索审批',
-                      onPressed: _showSearchDialog,
+                      onPressed: _isLoading ? null : _showSearchDialog,
                     ),
                     const SizedBox(width: 8),
                     FilledButton.icon(
-                      onPressed: _showCreateApprovalDialog,
+                      onPressed: _isLoading ? null : _showCreateApprovalDialog,
                       icon: const Icon(Icons.add),
                       label: const Text('发起审批'),
                     ),
@@ -89,6 +168,35 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
             ),
             
             const SizedBox(height: 24),
+            
+            // 错误信息显示
+            if (_hasError)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  border: Border.all(color: Colors.red.shade200),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage,
+                        style: TextStyle(color: Colors.red.shade700),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _loadApprovalData,
+                      child: const Text('重试'),
+                    ),
+                  ],
+                ),
+              ),
             
             // 统计卡片
             _buildStatCards(),
@@ -107,14 +215,25 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
             
             // 标签页内容
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildPendingApprovals(),
-                  _buildApprovedItems(),
-                  _buildMyApplications(),
-                ],
-              ),
+              child: _isLoading
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('正在加载审批数据...'),
+                      ],
+                    ),
+                  )
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildPendingApprovals(),
+                      _buildApprovedItems(),
+                      _buildMyApplications(),
+                    ],
+                  ),
             ),
           ],
         ),
@@ -221,35 +340,37 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
       builder: (context) => ApprovalActionDialog(
         approval: approval,
         isApprove: isApprove,
-        onSubmit: (approval, isApprove, remark) {
+        onSubmit: (approval, isApprove, remark) async {
           // 处理审批逻辑
-          setState(() {
-            _approvals.remove(approval);
-            
-            // 创建新的审批数据
-            Approval newApproval = Approval(
-              id: approval.id,
-              title: approval.title,
-              applicant: approval.applicant,
-              department: approval.department,
-              submitTime: approval.submitTime,
-              approveTime: '2025-06-01 ${DateTime.now().hour}:${DateTime.now().minute}',
-              status: isApprove ? ApprovalStatus.approved : ApprovalStatus.rejected,
-              type: approval.type,
-              urgent: approval.urgent,
-              rejectReason: (!isApprove && remark != null) ? remark : null,
+          try {
+            await _approvalService.processApproval(
+              approvalId: approval.id,
+              isApprove: isApprove,
+              userId: _currentUserId,
+              remark: remark,
             );
             
-            // 添加到已审批列表
-            _approvedItems.insert(0, newApproval);
-          });
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('已${isApprove ? '通过' : '驳回'}审批'),
-              backgroundColor: isApprove ? Colors.green : Colors.red,
-            ),
-          );
+            // 重新加载数据
+            await _loadApprovalData();
+            
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('已${isApprove ? '通过' : '驳回'}审批'),
+                  backgroundColor: isApprove ? Colors.green : Colors.red,
+                ),
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('审批处理失败: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
         },
       ),
     );
@@ -282,19 +403,32 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
     showDialog(
       context: context,
       builder: (context) => CreateApprovalDialog(
-        onSubmit: (approval) {
+        onSubmit: (approval) async {
           // 处理提交逻辑
-          setState(() {
-            // 添加到我的申请列表
-            _myApplications.insert(0, approval);
-          });
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('审批申请已提交'),
-              backgroundColor: Colors.blue,
-            ),
-          );
+          try {
+            await _approvalService.submitApproval(approval);
+            
+            // 重新加载数据
+            await _loadApprovalData();
+            
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('审批申请已提交'),
+                  backgroundColor: Colors.blue,
+                ),
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('提交申请失败: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
         },
       ),
     );
@@ -306,53 +440,81 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
       context: context,
       builder: (context) => WithdrawApprovalDialog(
         approval: approval,
-        onWithdraw: (approval) {
+        onWithdraw: (approval) async {
           // 处理撤回逻辑
-          setState(() {
-            _myApplications.remove(approval);
-          });
-          
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('申请已撤回'),
-              backgroundColor: Colors.orange,
-            ),
-          );
+          try {
+            await _approvalService.withdrawApproval(
+              approvalId: approval.id,
+              userId: _currentUserId,
+            );
+            
+            // 重新加载数据
+            await _loadApprovalData();
+            
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('申请已撤回'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('撤回申请失败: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
         },
       ),
     );
   }
 
   // 显示搜索对话框
-  void _showSearchDialog() {
-    // 合并所有类型的审批
-    final List<Approval> allApprovals = [
-      ..._approvals,
-      ..._approvedItems,
-      ..._myApplications,
-    ];
-    
-    if (allApprovals.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('暂无审批数据可搜索')),
-      );
-      return;
+  void _showSearchDialog() async {
+    try {
+      // 获取所有审批数据用于搜索
+      final allApprovals = await _approvalService.getAllApprovals(_currentUserId);
+      
+      if (allApprovals.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('暂无审批数据可搜索')),
+          );
+        }
+        return;
+      }
+      
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => ApprovalSearchDialog(
+            approvals: allApprovals,
+            onSelect: (approval) {
+              // 根据审批类型决定显示哪种详情对话框
+              if (_myApplications.any((item) => item.id == approval.id)) {
+                _showMyApplicationDetailDialog(approval);
+              } else {
+                _showApprovalDetailDialog(approval);
+              }
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('获取搜索数据失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
-    
-    showDialog(
-      context: context,
-      builder: (context) => ApprovalSearchDialog(
-        approvals: allApprovals,
-        onSelect: (approval) {
-          // 根据审批类型决定显示哪种详情对话框
-          if (_myApplications.contains(approval)) {
-            _showMyApplicationDetailDialog(approval);
-          } else {
-            _showApprovalDetailDialog(approval);
-          }
-        },
-      ),
-    );
   }
 
 }

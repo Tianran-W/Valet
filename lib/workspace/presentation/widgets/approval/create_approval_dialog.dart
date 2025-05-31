@@ -20,7 +20,6 @@ class _CreateApprovalDialogState extends State<CreateApprovalDialog> {
   final _departmentController = TextEditingController();
   final _reasonController = TextEditingController();
   
-  ApprovalType _selectedType = ApprovalType.purchase;
   bool _isUrgent = false;
   
   @override
@@ -69,28 +68,6 @@ class _CreateApprovalDialogState extends State<CreateApprovalDialog> {
                     return '请输入所属部门';
                   }
                   return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              
-              // 审批类型
-              DropdownButtonFormField<ApprovalType>(
-                value: _selectedType,
-                decoration: const InputDecoration(
-                  labelText: '审批类型 *',
-                ),
-                items: ApprovalType.values.map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(type.name),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedType = value;
-                    });
-                  }
                 },
               ),
               const SizedBox(height: 16),
@@ -155,10 +132,10 @@ class _CreateApprovalDialogState extends State<CreateApprovalDialog> {
       final approval = Approval(
         id: id,
         title: _titleController.text.trim(),
+        applicant: '当前用户', // 实际应用中应该从用户认证服务获取
         department: _departmentController.text.trim(),
         submitTime: submitTime,
         status: ApprovalStatus.processing,
-        type: _selectedType,
         urgent: _isUrgent,
         currentApprover: '张经理', // 假设默认审批人
       );
