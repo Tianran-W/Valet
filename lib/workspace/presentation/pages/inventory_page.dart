@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/inventory_model.dart';
 import '../../models/item_examples.dart';
+import '../widgets/inventory/inventory_widgets.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -100,40 +101,9 @@ class _InventoryPageState extends State<InventoryPage> {
     );
   }
 
-  // 物品详情行
+  // 物品详情行，使用DetailRowWidget组件
   Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              '$label:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(child: Text(value)),
-        ],
-      ),
-    );
-  }
-
-  // 状态颜色
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case '在库可借':
-        return Colors.green;
-      case '已借出':
-        return Colors.blue;
-      case '维修中':
-        return Colors.orange;
-      case '已报废':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
+    return DetailRowWidget(label: label, value: value);
   }
 
   @override
@@ -183,118 +153,35 @@ class _InventoryPageState extends State<InventoryPage> {
             const SizedBox(height: 24),
             
             // 搜索和过滤区域
-            Row(
-              children: [
-                // 搜索框
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: '搜索商品名称或ID',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                
-                // 分类过滤
-                Expanded(
-                  child: DropdownButtonFormField<ProductCategory>(
-                    decoration: InputDecoration(
-                      labelText: '商品分类',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    ),
-                    value: _selectedCategory,
-                    items: _categories
-                        .map((category) => DropdownMenuItem(
-                              value: category,
-                              child: Text(category.displayName),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _selectedCategory = value;
-                        });
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                
-                // 状态过滤
-                Expanded(
-                  child: DropdownButtonFormField<InventoryStatus?>(
-                    decoration: InputDecoration(
-                      labelText: '库存状态',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                    ),
-                    value: _selectedStatus,
-                    items: _statusOptions
-                        .map((status) => DropdownMenuItem(
-                              value: status,
-                              child: Text(status?.displayName ?? '全部'),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedStatus = value;
-                      });
-                    },
-                  ),
-                ),
-              ],
+            InventoryFilters(
+              searchController: _searchController,
+              searchQuery: _searchQuery,
+              onSearchChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+              selectedCategory: _selectedCategory,
+              categories: _categories,
+              onCategoryChanged: (value) {
+                if (value != null) {
+                  setState(() {
+                    _selectedCategory = value;
+                  });
+                }
+              },
+              selectedStatus: _selectedStatus,
+              statusOptions: _statusOptions,
+              onStatusChanged: (value) {
+                setState(() {
+                  _selectedStatus = value;
+                });
+              },
             ),
             const SizedBox(height: 16),
             
             // 统计信息卡片
-            Row(
-              children: [
-                _buildStatCard(
-                  '物品总数',
-                  '${_inventoryItems.length}',
-                  Icons.inventory_2,
-                  Colors.blue,
-                ),
-                const SizedBox(width: 16),
-                _buildStatCard(
-                  '已借出',
-                  '${_inventoryItems.where((item) => item.status == InventoryStatus.onLoan).length}',
-                  Icons.person,
-                  Colors.blue,
-                ),
-                const SizedBox(width: 16),
-                _buildStatCard(
-                  '维修中',
-                  '${_inventoryItems.where((item) => item.status == InventoryStatus.maintenance).length}',
-                  Icons.build,
-                  Colors.orange,
-                ),
-                const SizedBox(width: 16),
-                _buildStatCard(
-                  '已报废',
-                  '${_inventoryItems.where((item) => item.status == InventoryStatus.scrapped).length}',
-                  Icons.delete_outline,
-                  Colors.red,
-                ),
-              ],
-            ),
+            InventoryStats(items: _inventoryItems),
             const SizedBox(height: 24),
             
             // 列表标题
@@ -317,68 +204,16 @@ class _InventoryPageState extends State<InventoryPage> {
             
             // 库存列表
             Expanded(
-              child: Card(
-                elevation: 1,
-                child: _filteredItems.isEmpty
-                    ? const Center(child: Text('没有找到匹配的商品'))
-                    : ListView.separated(
-                        itemCount: _filteredItems.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final item = _filteredItems[index];
-                          return ListTile(
-                            onTap: () => _showItemDetails(item),
-                            leading: CircleAvatar(
-                              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                              child: Text(item.id.substring(1)),
-                            ),
-                            title: Text(item.name),
-                            subtitle: Text('${item.category.displayName} | ¥${item.price.toStringAsFixed(2)}'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // 库存状态标签
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: _getStatusColor(item.status.displayName).withAlpha(51),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: _getStatusColor(item.status.displayName),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    '${item.status.displayName} (${item.quantity})',
-                                    style: TextStyle(
-                                      color: _getStatusColor(item.status.displayName),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                
-                                // 操作按钮
-                                IconButton(
-                                  icon: const Icon(Icons.edit_outlined),
-                                  onPressed: () => _showEditItemDialog(item),
-                                  tooltip: '编辑',
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.more_vert),
-                                  onPressed: () {
-                                    // 显示更多操作菜单
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('更多操作: ${item.name}')),
-                                    );
-                                  },
-                                  tooltip: '更多操作',
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+              child: InventoryItemList(
+                items: _filteredItems,
+                onItemTap: _showItemDetails,
+                onItemEdit: _showEditItemDialog,
+                onItemMoreActions: (item) {
+                  // 显示更多操作菜单
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('更多操作: ${item.name}')),
+                  );
+                },
               ),
             ),
           ],
@@ -387,45 +222,5 @@ class _InventoryPageState extends State<InventoryPage> {
     );
   }
 
-  // 统计卡片组件
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Expanded(
-      child: Card(
-        elevation: 1,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: color.withAlpha(51),
-                child: Icon(icon, color: color),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+
 }
