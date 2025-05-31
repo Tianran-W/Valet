@@ -1,10 +1,11 @@
 // 库存管理相关的数据模型
 
-/// 商品库存状态枚举
+/// 物品使用状态枚举
 enum InventoryStatus {
-  normal('正常'),
-  low('低库存'),
-  outOfStock('缺货');
+  inStock('在库可借'),
+  onLoan('已借出'),
+  maintenance('维修中'),
+  scrapped('已报废');
 
   final String label;
   const InventoryStatus(this.label);
@@ -12,10 +13,11 @@ enum InventoryStatus {
   /// 从字符串转换为枚举值
   static InventoryStatus fromString(String status) {
     return switch (status) {
-      '正常' => InventoryStatus.normal,
-      '低库存' => InventoryStatus.low,
-      '缺货' => InventoryStatus.outOfStock,
-      _ => InventoryStatus.normal,
+      '在库可借' => InventoryStatus.inStock,
+      '已借出' => InventoryStatus.onLoan,
+      '维修中' => InventoryStatus.maintenance,
+      '已报废' => InventoryStatus.scrapped,
+      _ => InventoryStatus.inStock,
     };
   }
 
@@ -23,14 +25,13 @@ enum InventoryStatus {
   String get displayName => label;
 }
 
-/// 商品类别枚举
+/// 物品类别枚举
 enum ProductCategory {
   all('全部'),
-  electronics('电子产品'),
-  office('办公用品'),
-  daily('生活用品'),
-  food('食品'),
-  clothing('服装');
+  mechanical('机械'),
+  electronics('电控'),
+  vision('视觉'),
+  hardware('硬件');
 
   final String label;
   const ProductCategory(this.label);
@@ -38,11 +39,10 @@ enum ProductCategory {
   /// 从字符串转换为枚举值
   static ProductCategory fromString(String category) {
     return switch (category) {
-      '电子产品' => ProductCategory.electronics,
-      '办公用品' => ProductCategory.office,
-      '生活用品' => ProductCategory.daily,
-      '食品' => ProductCategory.food,
-      '服装' => ProductCategory.clothing,
+      '机械' => ProductCategory.mechanical,
+      '电控' => ProductCategory.electronics,
+      '视觉' => ProductCategory.vision,
+      '硬件' => ProductCategory.hardware,
       _ => ProductCategory.all,
     };
   }
@@ -51,84 +51,25 @@ enum ProductCategory {
   String get displayName => label;
 }
 
-/// 商品模型类
-class Product {
+/// 物品模型类
+class Item {
   final String id;
   final String name;
   final ProductCategory category;
   final double price;
-  final int stock;
+  final int quantity;
   final InventoryStatus status;
   final String lastUpdate;
+  final String? borrowedBy; // 借用人信息，仅当状态为已借出时有值
 
-  const Product({
+  const Item({
     required this.id,
     required this.name,
     required this.category,
     required this.price,
-    required this.stock,
+    required this.quantity,
     required this.status,
     required this.lastUpdate,
+    this.borrowedBy,
   });
-
-  /// 从Map构造Product对象
-  factory Product.fromMap(Map<String, dynamic> map) {
-    return Product(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      category: ProductCategory.fromString(map['category'] as String),
-      price: map['price'] as double,
-      stock: map['stock'] as int,
-      status: InventoryStatus.fromString(map['status'] as String),
-      lastUpdate: map['lastUpdate'] as String,
-    );
-  }
-
-  /// 将Product对象转换为Map
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'category': category.displayName,
-      'price': price,
-      'stock': stock,
-      'status': status.displayName,
-      'lastUpdate': lastUpdate,
-    };
-  }
-
-  /// 创建Product对象的副本，可以选择性地覆盖某些属性
-  Product copyWith({
-    String? id,
-    String? name,
-    ProductCategory? category,
-    double? price,
-    int? stock,
-    InventoryStatus? status,
-    String? lastUpdate,
-  }) {
-    return Product(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      category: category ?? this.category,
-      price: price ?? this.price,
-      stock: stock ?? this.stock,
-      status: status ?? this.status,
-      lastUpdate: lastUpdate ?? this.lastUpdate,
-    );
-  }
-
-  /// 根据库存量更新状态
-  Product updateStatusBasedOnStock() {
-    InventoryStatus newStatus;
-    if (stock <= 0) {
-      newStatus = InventoryStatus.outOfStock;
-    } else if (stock <= 5) {
-      newStatus = InventoryStatus.low;
-    } else {
-      newStatus = InventoryStatus.normal;
-    }
-    
-    return copyWith(status: newStatus);
-  }
 }

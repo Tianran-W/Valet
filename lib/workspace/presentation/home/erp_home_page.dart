@@ -19,11 +19,9 @@ class _ERPHomePageState extends State<ERPHomePage> {
   static final List<Widget> _pages = [
     const DashboardPage(),
     const InventoryPage(),
-    const SalesPage(),
     const PurchasePage(),
     const HRPage(),
     const FinancePage(),
-    const ReportsPage(),
     const SettingsPage(),
   ];
 
@@ -31,11 +29,9 @@ class _ERPHomePageState extends State<ERPHomePage> {
   final List<DrawerMenuItem> _drawerMenuItems = [
     DrawerMenuItem(title: '仪表盘', icon: Icons.dashboard),
     DrawerMenuItem(title: '库存管理', icon: Icons.inventory),
-    DrawerMenuItem(title: '销售管理', icon: Icons.point_of_sale),
     DrawerMenuItem(title: '采购管理', icon: Icons.shopping_cart),
     DrawerMenuItem(title: '人力资源', icon: Icons.people),
     DrawerMenuItem(title: '财务管理', icon: Icons.account_balance),
-    DrawerMenuItem(title: '报表分析', icon: Icons.bar_chart),
     DrawerMenuItem(title: '系统设置', icon: Icons.settings),
   ];
 

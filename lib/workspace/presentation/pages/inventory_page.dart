@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/inventory_model.dart';
+import '../../models/item_examples.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -13,118 +14,56 @@ class _InventoryPageState extends State<InventoryPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
   
-  // 库存分类过滤
+  // 分类过滤
   ProductCategory _selectedCategory = ProductCategory.all;
   final List<ProductCategory> _categories = ProductCategory.values;
   
-  // 库存状态过滤
+  // 状态过滤
   InventoryStatus? _selectedStatus;
   final List<InventoryStatus?> _statusOptions = [null, ...InventoryStatus.values];
   
-  // 示例库存数据
-  final List<Product> _inventoryItems = [
-    Product(
-      id: "P001",
-      name: "笔记本电脑",
-      category: ProductCategory.electronics,
-      price: 5999.00,
-      stock: 15,
-      status: InventoryStatus.normal,
-      lastUpdate: "2025-05-25",
-    ),
-    Product(
-      id: "P002",
-      name: "办公座椅",
-      category: ProductCategory.office,
-      price: 799.00,
-      stock: 3,
-      status: InventoryStatus.low,
-      lastUpdate: "2025-05-27",
-    ),
-    Product(
-      id: "P003",
-      name: "打印机墨盒",
-      category: ProductCategory.office,
-      price: 159.00,
-      stock: 0,
-      status: InventoryStatus.outOfStock,
-      lastUpdate: "2025-05-20",
-    ),
-    Product(
-      id: "P004",
-      name: "智能手机",
-      category: ProductCategory.electronics,
-      price: 3299.00,
-      stock: 42,
-      status: InventoryStatus.normal,
-      lastUpdate: "2025-05-28",
-    ),
-    Product(
-      id: "P005",
-      name: "矿泉水(箱)",
-      category: ProductCategory.food,
-      price: 36.00,
-      stock: 8,
-      status: InventoryStatus.normal,
-      lastUpdate: "2025-05-29",
-    ),
-    Product(
-      id: "P006",
-      name: "工作服",
-      category: ProductCategory.clothing,
-      price: 128.00,
-      stock: 4,
-      status: InventoryStatus.low,
-      lastUpdate: "2025-05-26",
-    ),
-    Product(
-      id: "P007",
-      name: "茶杯",
-      category: ProductCategory.daily,
-      price: 29.90,
-      stock: 25,
-      status: InventoryStatus.normal,
-      lastUpdate: "2025-05-21",
-    ),
-  ];
+  // 示例物品数据
+  final List<Item> _inventoryItems = ItemExamples.getAllItems();
 
-  // 获取过滤后的库存列表
-  List<Product> get _filteredItems {
-    return _inventoryItems.where((product) {
+  // 获取过滤后的物品列表
+  List<Item> get _filteredItems {
+    return _inventoryItems.where((item) {
       // 根据搜索词过滤
       final matchesSearch = _searchQuery.isEmpty || 
-          product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          product.id.toLowerCase().contains(_searchQuery.toLowerCase());
+          item.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          item.id.toLowerCase().contains(_searchQuery.toLowerCase());
       
       // 根据分类过滤
       final matchesCategory = _selectedCategory == ProductCategory.all || 
-          product.category == _selectedCategory;
+          item.category == _selectedCategory;
       
       // 根据状态过滤
-      final matchesStatus = _selectedStatus == null || product.status == _selectedStatus;
+      final matchesStatus = _selectedStatus == null || item.status == _selectedStatus;
       
       return matchesSearch && matchesCategory && matchesStatus;
     }).toList();
   }
 
-  // 显示商品详情对话框
-  void _showItemDetails(Product product) {
+  // 显示物品详情对话框
+  void _showItemDetails(Item item) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('商品详情: ${product.name}'),
+        title: Text('物品详情: ${item.name}'),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              _detailRow('商品ID', product.id),
-              _detailRow('商品名称', product.name),
-              _detailRow('类别', product.category.displayName),
-              _detailRow('单价', '¥${product.price.toStringAsFixed(2)}'),
-              _detailRow('库存数量', '${product.stock}'),
-              _detailRow('库存状态', product.status.displayName),
-              _detailRow('最后更新', product.lastUpdate),
+              _detailRow('物品ID', item.id),
+              _detailRow('物品名称', item.name),
+              _detailRow('类别', item.category.displayName),
+              _detailRow('单价', '¥${item.price.toStringAsFixed(2)}'),
+              _detailRow('数量', '${item.quantity}'),
+              _detailRow('状态', item.status.displayName),
+              if (item.status == InventoryStatus.onLoan && item.borrowedBy != null)
+                _detailRow('借用人', item.borrowedBy!),
+              _detailRow('最后更新', item.lastUpdate),
             ],
           ),
         ),
@@ -136,7 +75,7 @@ class _InventoryPageState extends State<InventoryPage> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _showEditItemDialog(product);
+              _showEditItemDialog(item);
             },
             child: const Text('编辑'),
           ),
@@ -145,23 +84,23 @@ class _InventoryPageState extends State<InventoryPage> {
     );
   }
 
-  // 显示编辑商品对话框
-  void _showEditItemDialog(Product product) {
+  // 显示编辑物品对话框
+  void _showEditItemDialog(Item item) {
     // 在实际应用中，这里会实现编辑功能
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('编辑商品: ${product.name} (功能开发中)')),
+      SnackBar(content: Text('编辑物品: ${item.name} (功能开发中)')),
     );
   }
 
-  // 显示新增商品对话框
+  // 显示新增物品对话框
   void _showAddItemDialog() {
     // 在实际应用中，这里会实现添加功能
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('添加新商品功能开发中')),
+      const SnackBar(content: Text('添加新物品功能开发中')),
     );
   }
 
-  // 商品详情行
+  // 物品详情行
   Widget _detailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -181,14 +120,16 @@ class _InventoryPageState extends State<InventoryPage> {
     );
   }
 
-  // 库存状态颜色
+  // 状态颜色
   Color _getStatusColor(String status) {
     switch (status) {
-      case '正常':
+      case '在库可借':
         return Colors.green;
-      case '低库存':
+      case '已借出':
+        return Colors.blue;
+      case '维修中':
         return Colors.orange;
-      case '缺货':
+      case '已报废':
         return Colors.red;
       default:
         return Colors.grey;
@@ -326,23 +267,30 @@ class _InventoryPageState extends State<InventoryPage> {
             Row(
               children: [
                 _buildStatCard(
-                  '商品总数',
+                  '物品总数',
                   '${_inventoryItems.length}',
                   Icons.inventory_2,
                   Colors.blue,
                 ),
                 const SizedBox(width: 16),
                 _buildStatCard(
-                  '低库存商品',
-                  '${_inventoryItems.where((product) => product.status == InventoryStatus.low).length}',
-                  Icons.warning_amber,
+                  '已借出',
+                  '${_inventoryItems.where((item) => item.status == InventoryStatus.onLoan).length}',
+                  Icons.person,
+                  Colors.blue,
+                ),
+                const SizedBox(width: 16),
+                _buildStatCard(
+                  '维修中',
+                  '${_inventoryItems.where((item) => item.status == InventoryStatus.maintenance).length}',
+                  Icons.build,
                   Colors.orange,
                 ),
                 const SizedBox(width: 16),
                 _buildStatCard(
-                  '缺货商品',
-                  '${_inventoryItems.where((product) => product.status == InventoryStatus.outOfStock).length}',
-                  Icons.error_outline,
+                  '已报废',
+                  '${_inventoryItems.where((item) => item.status == InventoryStatus.scrapped).length}',
+                  Icons.delete_outline,
                   Colors.red,
                 ),
               ],
@@ -353,12 +301,12 @@ class _InventoryPageState extends State<InventoryPage> {
             Row(
               children: [
                 Text(
-                  '库存列表',
+                  '物品列表',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '(${_filteredItems.length}个商品)',
+                  '(${_filteredItems.length}个物品)',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey,
                   ),
@@ -377,15 +325,15 @@ class _InventoryPageState extends State<InventoryPage> {
                         itemCount: _filteredItems.length,
                         separatorBuilder: (context, index) => const Divider(height: 1),
                         itemBuilder: (context, index) {
-                          final product = _filteredItems[index];
+                          final item = _filteredItems[index];
                           return ListTile(
-                            onTap: () => _showItemDetails(product),
+                            onTap: () => _showItemDetails(item),
                             leading: CircleAvatar(
                               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                              child: Text(product.id.substring(1)),
+                              child: Text(item.id.substring(1)),
                             ),
-                            title: Text(product.name),
-                            subtitle: Text('${product.category.displayName} | ¥${product.price.toStringAsFixed(2)}'),
+                            title: Text(item.name),
+                            subtitle: Text('${item.category.displayName} | ¥${item.price.toStringAsFixed(2)}'),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -393,17 +341,17 @@ class _InventoryPageState extends State<InventoryPage> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: _getStatusColor(product.status.displayName).withAlpha(51),
+                                    color: _getStatusColor(item.status.displayName).withAlpha(51),
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: _getStatusColor(product.status.displayName),
+                                      color: _getStatusColor(item.status.displayName),
                                       width: 1,
                                     ),
                                   ),
                                   child: Text(
-                                    '${product.status.displayName} (${product.stock})',
+                                    '${item.status.displayName} (${item.quantity})',
                                     style: TextStyle(
-                                      color: _getStatusColor(product.status.displayName),
+                                      color: _getStatusColor(item.status.displayName),
                                       fontSize: 12,
                                     ),
                                   ),
@@ -413,7 +361,7 @@ class _InventoryPageState extends State<InventoryPage> {
                                 // 操作按钮
                                 IconButton(
                                   icon: const Icon(Icons.edit_outlined),
-                                  onPressed: () => _showEditItemDialog(product),
+                                  onPressed: () => _showEditItemDialog(item),
                                   tooltip: '编辑',
                                 ),
                                 IconButton(
@@ -421,7 +369,7 @@ class _InventoryPageState extends State<InventoryPage> {
                                   onPressed: () {
                                     // 显示更多操作菜单
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('更多操作: ${product.name}')),
+                                      SnackBar(content: Text('更多操作: ${item.name}')),
                                     );
                                   },
                                   tooltip: '更多操作',
