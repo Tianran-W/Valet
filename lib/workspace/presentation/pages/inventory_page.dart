@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:valet/api/core/api_service.dart';
+import 'package:valet/api/core/logger_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/presentation/widgets/inventory/inventory_widgets.dart';
@@ -77,8 +79,6 @@ class _InventoryPageState extends State<InventoryPage> {
               _detailRow('数量', '${item.quantity}'),
               _detailRow('贵重物品', item.isValuable ? '是' : '否'),
               _detailRow('状态', item.status.displayName),
-              if (item.status == InventoryStatus.onLoan && item.borrowedBy != null)
-                _detailRow('借用人', item.borrowedBy!),
             ],
           ),
         ),
@@ -139,7 +139,9 @@ class _InventoryPageState extends State<InventoryPage> {
   void initState() {
     super.initState();
     // 初始化API服务
-    final apiService = ApiService.create(baseUrl: 'https://api.valet.example.com');
+    final backendUrl = dotenv.env['BACKEND_URL'] ?? "";
+    logger.info('初始化库存服务 $backendUrl', tag: 'InventoryPage');
+    final apiService = ApiService.create(baseUrl: backendUrl);
     _inventoryService = InventoryService(apiService);
     
     // 加载数据

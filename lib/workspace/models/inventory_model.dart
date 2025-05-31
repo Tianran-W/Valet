@@ -32,7 +32,6 @@ class Item {
   final String category;
   final int quantity;
   final InventoryStatus status;
-  final String? borrowedBy;
   final bool isValuable;
   final String? serialNumber;
 
@@ -42,7 +41,6 @@ class Item {
     required this.category,
     required this.quantity,
     required this.status,
-    this.borrowedBy,
     this.isValuable = false,
     this.serialNumber,
   });
@@ -50,14 +48,13 @@ class Item {
   /// 从JSON映射创建Item实例
   factory Item.fromJson(Map<String, dynamic> json) {
     return Item(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      category: json['category'] as String,
-      quantity: json['quantity'] as int,
-      status: InventoryStatus.fromString(json['status'] as String),
-      borrowedBy: json['borrowed_by'] as String?,
-      isValuable: json['is_valuable'] as bool? ?? false,
-      serialNumber: json['serial_number'] as String?,
+      id: json['materialId']?.toString() ?? '',
+      name: json['materialName']?.toString() ?? '',
+      category: json['categoryName']?.toString() ?? '',
+      quantity: json['quantity'] is int ? json['quantity'] : 0,
+      status: InventoryStatus.fromString(json['status']?.toString() ?? ''),
+      isValuable: json['isExpensive'] == 1 || json['isExpensive'] == true,
+      serialNumber: json['snCode']?.toString(),
     );
   }
   
@@ -70,7 +67,6 @@ class Item {
       'quantity': quantity,
       'status': status.displayName,
       'is_valuable': isValuable,
-      if (borrowedBy != null) 'borrowed_by': borrowedBy,
       if (serialNumber != null) 'serial_number': serialNumber,
     };
   }

@@ -15,7 +15,7 @@ class WorkspaceApi {
     String? category,
     String? status,
   }) async {
-    final List<dynamic> response = await _apiClient.get('/items');
+    final List<dynamic> response = await _apiClient.get('/getAllMaterial');
     return response.map((json) => Item.fromJson(json)).toList();
   }
 }
