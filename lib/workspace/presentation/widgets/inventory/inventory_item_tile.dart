@@ -25,8 +25,24 @@ class InventoryItemTile extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         child: Text(item.id.substring(1)),
       ),
-      title: Text(item.name),
-      subtitle: Text('${item.category.displayName} | ¥${item.price.toStringAsFixed(2)}'),
+      title: Row(
+        children: [
+          Text(item.name),
+          if (item.isValuable) 
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Tooltip(
+                message: '贵重物品',
+                child: Icon(
+                  Icons.stars, 
+                  size: 16, 
+                  color: Colors.amber,
+                ),
+              ),
+            ),
+        ],
+      ),
+      subtitle: Text(item.category),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

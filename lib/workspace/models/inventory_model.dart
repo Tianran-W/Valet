@@ -25,52 +25,24 @@ enum InventoryStatus {
   String get displayName => label;
 }
 
-/// 物品类别枚举
-enum ProductCategory {
-  all('全部'),
-  mechanical('机械'),
-  electronics('电控'),
-  vision('视觉'),
-  hardware('硬件');
-
-  final String label;
-  const ProductCategory(this.label);
-
-  /// 从字符串转换为枚举值
-  static ProductCategory fromString(String category) {
-    return switch (category) {
-      '机械' => ProductCategory.mechanical,
-      '电控' => ProductCategory.electronics,
-      '视觉' => ProductCategory.vision,
-      '硬件' => ProductCategory.hardware,
-      _ => ProductCategory.all,
-    };
-  }
-
-  /// 将枚举值转换为显示文本
-  String get displayName => label;
-}
-
 /// 物品模型类
 class Item {
   final String id;
   final String name;
-  final ProductCategory category;
-  final double price;
+  final String category;
   final int quantity;
   final InventoryStatus status;
-  final String lastUpdate;
-  final String? borrowedBy; // 借用人信息，仅当状态为已借出时有值
+  final String? borrowedBy;
+  final bool isValuable; // 是否为贵重物品
 
   const Item({
     required this.id,
     required this.name,
     required this.category,
-    required this.price,
     required this.quantity,
     required this.status,
-    required this.lastUpdate,
     this.borrowedBy,
+    this.isValuable = false, // 默认为非贵重物品
   });
   
   /// 从JSON映射创建Item实例
@@ -78,12 +50,11 @@ class Item {
     return Item(
       id: json['id'] as String,
       name: json['name'] as String,
-      category: ProductCategory.fromString(json['category'] as String),
-      price: (json['price'] as num).toDouble(),
+      category: json['category'] as String,
       quantity: json['quantity'] as int,
       status: InventoryStatus.fromString(json['status'] as String),
-      lastUpdate: json['last_update'] as String,
       borrowedBy: json['borrowed_by'] as String?,
+      isValuable: json['is_valuable'] as bool? ?? false,
     );
   }
   
@@ -92,11 +63,10 @@ class Item {
     return {
       'id': id,
       'name': name,
-      'category': category.displayName,
-      'price': price,
+      'category': category,
       'quantity': quantity,
       'status': status.displayName,
-      'last_update': lastUpdate,
+      'is_valuable': isValuable,
       if (borrowedBy != null) 'borrowed_by': borrowedBy,
     };
   }

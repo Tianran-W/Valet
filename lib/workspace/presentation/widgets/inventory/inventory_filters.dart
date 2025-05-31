@@ -6,24 +6,28 @@ class InventoryFilters extends StatelessWidget {
   final TextEditingController searchController;
   final String searchQuery;
   final Function(String) onSearchChanged;
-  final ProductCategory selectedCategory;
-  final List<ProductCategory> categories;
-  final Function(ProductCategory?) onCategoryChanged;
+  final TextEditingController categoryController;
+  final String categoryQuery;
+  final Function(String) onCategoryChanged;
   final InventoryStatus? selectedStatus;
   final List<InventoryStatus?> statusOptions;
   final Function(InventoryStatus?) onStatusChanged;
+  final bool? isValuableFilter; 
+  final Function(bool?) onIsValuableChanged;
 
   const InventoryFilters({
     super.key,
     required this.searchController,
     required this.searchQuery,
     required this.onSearchChanged,
-    required this.selectedCategory,
-    required this.categories,
+    required this.categoryController,
+    required this.categoryQuery,
     required this.onCategoryChanged,
     required this.selectedStatus,
     required this.statusOptions,
     required this.onStatusChanged,
+    required this.isValuableFilter,
+    required this.onIsValuableChanged,
   });
 
   @override
@@ -50,21 +54,17 @@ class InventoryFilters extends StatelessWidget {
         
         // 分类过滤
         Expanded(
-          child: DropdownButtonFormField<ProductCategory>(
+          child: TextField(
+            controller: categoryController,
             decoration: InputDecoration(
+              hintText: '输入物资分类',
               labelText: '物资分类',
+              prefixIcon: const Icon(Icons.category),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
             ),
-            value: selectedCategory,
-            items: categories
-                .map((category) => DropdownMenuItem(
-                      value: category,
-                      child: Text(category.displayName),
-                    ))
-                .toList(),
             onChanged: onCategoryChanged,
           ),
         ),
@@ -88,6 +88,36 @@ class InventoryFilters extends StatelessWidget {
                     ))
                 .toList(),
             onChanged: onStatusChanged,
+          ),
+        ),
+        const SizedBox(width: 16),
+        
+        // 贵重物品过滤
+        Expanded(
+          child: DropdownButtonFormField<bool?>(
+            decoration: InputDecoration(
+              labelText: '贵重物品',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
+            value: isValuableFilter,
+            items: const [
+              DropdownMenuItem(
+                value: null,
+                child: Text('全部'),
+              ),
+              DropdownMenuItem(
+                value: true,
+                child: Text('是'),
+              ),
+              DropdownMenuItem(
+                value: false,
+                child: Text('否'),
+              ),
+            ],
+            onChanged: onIsValuableChanged,
           ),
         ),
       ],

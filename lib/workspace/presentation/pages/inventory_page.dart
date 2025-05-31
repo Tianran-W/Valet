@@ -15,13 +15,16 @@ class _InventoryPageState extends State<InventoryPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
   
-  // 分类过滤
-  ProductCategory _selectedCategory = ProductCategory.all;
-  final List<ProductCategory> _categories = ProductCategory.values;
+  // 分类过滤控制器
+  final TextEditingController _categoryController = TextEditingController();
+  String _categoryQuery = "";
   
   // 状态过滤
   InventoryStatus? _selectedStatus;
   final List<InventoryStatus?> _statusOptions = [null, ...InventoryStatus.values];
+  
+  // 贵重物品过滤
+  bool? _isValuableFilter;
   
   // 示例物品数据
   final List<Item> _inventoryItems = ItemExamples.getAllItems();
@@ -35,13 +38,16 @@ class _InventoryPageState extends State<InventoryPage> {
           item.id.toLowerCase().contains(_searchQuery.toLowerCase());
       
       // 根据分类过滤
-      final matchesCategory = _selectedCategory == ProductCategory.all || 
-          item.category == _selectedCategory;
+      final matchesCategory = _categoryQuery.isEmpty || 
+          item.category.toLowerCase().contains(_categoryQuery.toLowerCase());
       
       // 根据状态过滤
       final matchesStatus = _selectedStatus == null || item.status == _selectedStatus;
       
-      return matchesSearch && matchesCategory && matchesStatus;
+      // 根据贵重物品过滤
+      final matchesValuable = _isValuableFilter == null || item.isValuable == _isValuableFilter;
+      
+      return matchesSearch && matchesCategory && matchesStatus && matchesValuable;
     }).toList();
   }
 
@@ -58,13 +64,12 @@ class _InventoryPageState extends State<InventoryPage> {
             children: [
               _detailRow('物品ID', item.id),
               _detailRow('物品名称', item.name),
-              _detailRow('类别', item.category.displayName),
-              _detailRow('单价', '¥${item.price.toStringAsFixed(2)}'),
+              _detailRow('类别', item.category),
               _detailRow('数量', '${item.quantity}'),
+              _detailRow('贵重物品', item.isValuable ? '是' : '否'),
               _detailRow('状态', item.status.displayName),
               if (item.status == InventoryStatus.onLoan && item.borrowedBy != null)
                 _detailRow('借用人', item.borrowedBy!),
-              _detailRow('最后更新', item.lastUpdate),
             ],
           ),
         ),
@@ -109,6 +114,7 @@ class _InventoryPageState extends State<InventoryPage> {
   @override
   void dispose() {
     _searchController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -161,20 +167,24 @@ class _InventoryPageState extends State<InventoryPage> {
                   _searchQuery = value;
                 });
               },
-              selectedCategory: _selectedCategory,
-              categories: _categories,
+              categoryController: _categoryController,
+              categoryQuery: _categoryQuery,
               onCategoryChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedCategory = value;
-                  });
-                }
+                setState(() {
+                  _categoryQuery = value;
+                });
               },
               selectedStatus: _selectedStatus,
               statusOptions: _statusOptions,
               onStatusChanged: (value) {
                 setState(() {
                   _selectedStatus = value;
+                });
+              },
+              isValuableFilter: _isValuableFilter,
+              onIsValuableChanged: (value) {
+                setState(() {
+                  _isValuableFilter = value;
                 });
               },
             ),
