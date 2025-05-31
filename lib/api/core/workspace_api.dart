@@ -1,3 +1,5 @@
+import 'package:valet/api/core/logger_service.dart';
+
 import 'api_client.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 
@@ -86,12 +88,13 @@ class WorkspaceApi {
     required int materialId,
     required int userId,
   }) async {
+    logger.info('归还物品: materialId=$materialId, userId=$userId');
     final Map<String, dynamic> body = {
-      'materialId': materialId,
-      'userId': userId,
+      'material_id': materialId,
+      'user_id': userId,
     };
     
-    await _apiClient.post('/returnMaterial', body: body);
+    await _apiClient.post('/return', body: body);
     return true;
   }
   

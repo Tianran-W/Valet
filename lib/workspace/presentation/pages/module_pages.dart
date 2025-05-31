@@ -18,15 +18,6 @@ class HRPage extends StatelessWidget {
   }
 }
 
-class FinancePage extends StatelessWidget {
-  const FinancePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('财务管理页面'));
-  }
-}
-
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:valet/workspace/presentation/widgets/drawer_widgets.dart';
+import 'package:valet/workspace/presentation/pages/approval_page.dart';
 import 'package:valet/workspace/presentation/pages/dashboard_page.dart';
 import 'package:valet/workspace/presentation/pages/inventory_page.dart';
 import 'package:valet/workspace/presentation/pages/module_pages.dart';
@@ -19,9 +20,9 @@ class _ERPHomePageState extends State<ERPHomePage> {
   static final List<Widget> _pages = [
     const DashboardPage(),
     const InventoryPage(),
+    const ApprovalPage(),
     const PurchasePage(),
     const HRPage(),
-    const FinancePage(),
     const SettingsPage(),
   ];
 
@@ -29,9 +30,9 @@ class _ERPHomePageState extends State<ERPHomePage> {
   final List<DrawerMenuItem> _drawerMenuItems = [
     DrawerMenuItem(title: '仪表盘', icon: Icons.dashboard),
     DrawerMenuItem(title: '库存管理', icon: Icons.inventory),
+    DrawerMenuItem(title: '请求审批', icon: Icons.approval),
     DrawerMenuItem(title: '采购管理', icon: Icons.shopping_cart),
     DrawerMenuItem(title: '人力资源', icon: Icons.people),
-    DrawerMenuItem(title: '财务管理', icon: Icons.account_balance),
     DrawerMenuItem(title: '系统设置', icon: Icons.settings),
   ];
 
