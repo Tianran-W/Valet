@@ -5,6 +5,8 @@ import 'package:valet/api/core/logger_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/presentation/widgets/inventory/inventory_widgets.dart';
+import 'package:valet/workspace/presentation/widgets/inventory/add_item_dialog.dart';
+import 'package:valet/workspace/presentation/widgets/inventory/borrow_item_dialog.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -29,6 +31,9 @@ class _InventoryPageState extends State<InventoryPage> {
   // 贵重物品过滤
   bool? _isValuableFilter;
   
+  // 当前用户ID (在实际应用中应从认证系统获取)
+  final int _currentUserId = 1;
+  
   // API服务
   late InventoryService _inventoryService;
   
@@ -46,7 +51,7 @@ class _InventoryPageState extends State<InventoryPage> {
       // 根据搜索词过滤
       final matchesSearch = _searchQuery.isEmpty || 
           item.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          item.id.toLowerCase().contains(_searchQuery.toLowerCase());
+          item.id.toString().contains(_searchQuery);
       
       // 根据分类过滤
       final matchesCategory = _categoryQuery.isEmpty || 
@@ -107,19 +112,118 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   // 显示新增物品对话框
-  void _showAddItemDialog() {
-    // 在实际应用中，这里会实现添加功能
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('添加新物品功能开发中')),
+  Future<void> _showAddItemDialog() async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) => AddItemDialog(
+        inventoryService: _inventoryService,
+      ),
     );
+    
+    if (result != null && mounted) {
+      try {
+        // 显示加载中提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('正在添加物品...')),
+        );
+        
+        // 添加物品
+        await _inventoryService.addItem(
+          name: result['name'],
+          category: result['categoryId'],
+          quantity: result['quantity'],
+          isValuable: result['isValuable'],
+          serialNumber: result['serialNumber'],
+          usageLimit: result['usageLimit'],
+        );
+        
+        if (mounted) {
+          // 显示成功提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('添加成功'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          
+          // 重新加载数据
+          _loadInventoryItems();
+        }
+      } catch (e) {
+        if (mounted) {
+          // 显示错误提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('添加失败: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   // 显示借用物品对话框
-  void _showBorrowItemDialog(Item item) {
-    // 在实际应用中，这里会实现借用功能
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('借用物品: ${item.name} (功能开发中)')),
+  Future<void> _showBorrowItemDialog(Item item) async {
+    // 只有在库可借的物品才能借用
+    if (item.status != InventoryStatus.inStock) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('物品: ${item.name} 当前状态为${item.status.displayName}，无法借用'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final result = await showDialog(
+      context: context,
+      builder: (context) => BorrowItemDialog(
+        item: item,
+        userId: _currentUserId,
+      ),
     );
+    
+    if (result != null && mounted) {
+      try {
+        // 显示加载中提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('正在处理借用请求...')),
+        );
+        
+        // 借用物品
+        await _inventoryService.borrowItem(
+          materialId: result['materialId'],
+          userId: result['userId'],
+          isValuable: result['isValuable'],
+          usageProject: result['usageProject'],
+          approvalReason: result['approvalReason'],
+        );
+        
+        if (mounted) {
+          // 显示成功提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('借用成功'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          
+          // 重新加载数据
+          _loadInventoryItems();
+        }
+      } catch (e) {
+        if (mounted) {
+          // 显示错误提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('借用失败: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   // 显示归还物品对话框
@@ -131,7 +235,7 @@ class _InventoryPageState extends State<InventoryPage> {
   }
 
   // 物品详情行，使用DetailRowWidget组件
-  Widget _detailRow(String label, String value) {
+  Widget _detailRow(String label, dynamic value) {
     return DetailRowWidget(label: label, value: value);
   }
 

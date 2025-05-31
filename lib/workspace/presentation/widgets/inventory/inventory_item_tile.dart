@@ -25,7 +25,7 @@ class InventoryItemTile extends StatelessWidget {
       onTap: () => onTap(item),
       leading: CircleAvatar(
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        child: Text(item.id.substring(1)),
+        child: Text(item.id.toString()),
       ),
       title: Row(
         children: [

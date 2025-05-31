@@ -25,9 +25,36 @@ enum InventoryStatus {
   String get displayName => label;
 }
 
+/// 物品类别模型
+class Category {
+  final int id;
+  final String name;
+
+  const Category({
+    required this.id,
+    required this.name,
+  });
+
+  /// 从JSON映射创建Category实例
+  factory Category.fromJson(Map<String, dynamic> json) {
+    return Category(
+      id: json['categoryId'] is int ? json['categoryId'] : 0,
+      name: json['categoryName']?.toString() ?? '',
+    );
+  }
+
+  /// 将Category实例转换为JSON映射
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+}
+
 /// 物品模型类
 class Item {
-  final String id;
+  final int id;
   final String name;
   final String category;
   final int quantity;
@@ -50,7 +77,7 @@ class Item {
   /// 从JSON映射创建Item实例
   factory Item.fromJson(Map<String, dynamic> json) {
     return Item(
-      id: json['materialId']?.toString() ?? '',
+      id: json['materialId'] is int ? json['materialId'] : int.tryParse(json['materialId']?.toString() ?? '0') ?? 0,
       name: json['materialName']?.toString() ?? '',
       category: json['categoryName']?.toString() ?? '',
       quantity: json['quantity'] is int ? json['quantity'] : 0,

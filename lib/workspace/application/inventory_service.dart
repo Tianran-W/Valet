@@ -10,6 +10,19 @@ class InventoryService {
   /// 构造函数
   InventoryService(this._apiService);
 
+  /// 获取物品类别列表
+  Future<List<Category>> getCategories() async {
+    try {
+      logger.info('正在获取物品类别列表', tag: _tag);
+      final result = await _apiService.workspaceApi.getCategories();
+      logger.debug('成功获取物品类别列表, 共${result.length}条记录', tag: _tag);
+      return result;
+    } catch (e) {
+      logger.error('获取物品类别列表失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('获取物品类别列表失败: $e');
+    }
+  }
+
   /// 获取物品列表
   /// [category]: 物品分类过滤条件
   /// [status]: 物品状态过滤条件
@@ -32,6 +45,71 @@ class InventoryService {
       // 处理异常
       logger.error('获取物品列表失败', tag: _tag, error: e, stackTrace: StackTrace.current);
       throw Exception('获取物品列表失败: $e');
+    }
+  }
+  
+  /// 添加新物品
+  /// [name]: 物品名称
+  /// [category]: 物品分类
+  /// [quantity]: 物品数量
+  /// [isValuable]: 是否贵重
+  /// [serialNumber]: SN码（可选）
+  /// [usageLimit]: 使用期限（可选）
+  Future<void> addItem({
+    required String name,
+    required int category,
+    required int quantity,
+    required bool isValuable,
+    String? serialNumber,
+    int? usageLimit,
+  }) async {
+    try {
+      logger.info('正在添加新物品: $name', tag: _tag);
+      
+      await _apiService.workspaceApi.addItem(
+        name: name,
+        category: category,
+        quantity: quantity,
+        isValuable: isValuable,
+        serialNumber: serialNumber,
+        usageLimit: usageLimit,
+      );
+      
+      logger.debug('成功添加新物品: $name', tag: _tag);
+    } catch (e) {
+      logger.error('添加物品失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('添加物品失败: $e');
+    }
+  }
+  
+  /// 借用物品
+  /// [materialId]: 物品ID
+  /// [userId]: 用户ID
+  /// [isValuable]: 是否贵重
+  /// [usageProject]: 使用项目
+  /// [approvalReason]: 借用原因
+  Future<void> borrowItem({
+    required int materialId,
+    required int userId,
+    required bool isValuable,
+    required String usageProject,
+    required String approvalReason,
+  }) async {
+    try {
+      logger.info('正在借用物品: $materialId, 项目: $usageProject', tag: _tag);
+      
+      await _apiService.workspaceApi.borrowItem(
+        materialId: materialId,
+        userId: userId,
+        isValuable: isValuable,
+        usageProject: usageProject,
+        approvalReason: approvalReason,
+      );
+      
+      logger.debug('成功借用物品: $materialId', tag: _tag);
+    } catch (e) {
+      logger.error('借用物品失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('借用物品失败: $e');
     }
   }
 }

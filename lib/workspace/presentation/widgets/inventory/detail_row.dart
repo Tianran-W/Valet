@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// 物品详情行组件
 class DetailRowWidget extends StatelessWidget {
   final String label;
-  final String value;
+  final dynamic value;
 
   const DetailRowWidget({
     super.key,
@@ -25,7 +25,7 @@ class DetailRowWidget extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          Expanded(child: Text(value)),
+          Expanded(child: Text(value.toString())),
         ],
       ),
     );
