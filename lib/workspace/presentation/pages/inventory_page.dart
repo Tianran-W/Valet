@@ -31,6 +31,10 @@ class _InventoryPageState extends State<InventoryPage> {
   // 贵重物品过滤
   bool? _isValuableFilter;
   
+  // 当前用户借用的物品过滤
+  bool _showMyBorrowings = false;
+  List<int> _userBorrowedItemIds = [];
+  
   // 当前用户ID (在实际应用中应从认证系统获取)
   final int _currentUserId = 1;
   
@@ -63,7 +67,10 @@ class _InventoryPageState extends State<InventoryPage> {
       // 根据贵重物品过滤
       final matchesValuable = _isValuableFilter == null || item.isValuable == _isValuableFilter;
       
-      return matchesSearch && matchesCategory && matchesStatus && matchesValuable;
+      // 根据用户借用过滤
+      final matchesUserBorrowings = !_showMyBorrowings || _userBorrowedItemIds.contains(item.id);
+      
+      return matchesSearch && matchesCategory && matchesStatus && matchesValuable && matchesUserBorrowings;
     }).toList();
   }
 
@@ -252,6 +259,8 @@ class _InventoryPageState extends State<InventoryPage> {
     _loadInventoryItems();
   }
   
+
+  
   // 从API加载物品数据
   Future<void> _loadInventoryItems() async {
     if (_isLoading) return;
@@ -263,13 +272,23 @@ class _InventoryPageState extends State<InventoryPage> {
     });
     
     try {
-      final items = await _inventoryService.getInventoryItems(
+      // 并行加载物品列表和用户借用记录
+      final itemsFuture = _inventoryService.getInventoryItems(
         category: _categoryQuery.isEmpty ? null : _categoryQuery,
         status: _selectedStatus?.displayName,
       );
       
+      final borrowingsFuture = _showMyBorrowings 
+          ? _inventoryService.getUserBorrowings(_currentUserId)
+          : Future.value(_userBorrowedItemIds);
+      
+      final results = await Future.wait([itemsFuture, borrowingsFuture]);
+      final items = results[0] as List<Item>;
+      final borrowedItemIds = results[1] as List<int>;
+      
       setState(() {
         _inventoryItems = items;
+        _userBorrowedItemIds = borrowedItemIds;
         _isLoading = false;
       });
     } catch (e) {
@@ -373,6 +392,14 @@ class _InventoryPageState extends State<InventoryPage> {
                 setState(() {
                   _isValuableFilter = value;
                 });
+              },
+              showMyBorrowings: _showMyBorrowings,
+              onShowMyBorrowingsChanged: (value) {
+                setState(() {
+                  _showMyBorrowings = value;
+                });
+                // 当切换"我的借用"过滤时重新加载数据
+                _loadInventoryItems();
               },
             ),
             const SizedBox(height: 16),

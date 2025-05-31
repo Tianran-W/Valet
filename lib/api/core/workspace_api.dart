@@ -70,12 +70,25 @@ class WorkspaceApi {
     final Map<String, dynamic> body = {
       'materialId': materialId,
       'userId': userId,
-      'isValuable': isValuable ? 1 : 0,
+      'isExpensive': isValuable ? 1 : 0,
       'usageProject': usageProject,
       'approvalReason': approvalReason,
     };
     
     await _apiClient.post('/addNewBorrow', body: body);
     return true;
+  }
+  
+  /// 获取指定用户的借用记录
+  /// [userId]: 用户ID
+  Future<List<int>> getBorrowingsByUserId(int userId) async {
+    final Map<String, dynamic> body = {
+      'userId': userId,
+    };
+    
+    final List<dynamic> response = await _apiClient.post('/findBorrowingByUserId', body: body);
+    
+    // 返回该用户借用的物品ID列表
+    return response.map<int>((item) => item['materialId'] as int).toList();
   }
 }

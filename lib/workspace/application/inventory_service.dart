@@ -97,7 +97,7 @@ class InventoryService {
   }) async {
     try {
       logger.info('正在借用物品: $materialId, 项目: $usageProject', tag: _tag);
-      
+      logger.debug('借用参数: userId=$userId, isValuable=$isValuable, approvalReason=$approvalReason', tag: _tag);
       await _apiService.workspaceApi.borrowItem(
         materialId: materialId,
         userId: userId,
@@ -110,6 +110,22 @@ class InventoryService {
     } catch (e) {
       logger.error('借用物品失败', tag: _tag, error: e, stackTrace: StackTrace.current);
       throw Exception('借用物品失败: $e');
+    }
+  }
+  
+  /// 获取用户借用的物品ID列表
+  /// [userId]: 用户ID
+  Future<List<int>> getUserBorrowings(int userId) async {
+    try {
+      logger.info('正在获取用户借用记录: userId=$userId', tag: _tag);
+      
+      final borrowings = await _apiService.workspaceApi.getBorrowingsByUserId(userId);
+      
+      logger.debug('成功获取用户借用记录, 共${borrowings.length}条记录', tag: _tag);
+      return borrowings;
+    } catch (e) {
+      logger.error('获取用户借用记录失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('获取用户借用记录失败: $e');
     }
   }
 }
