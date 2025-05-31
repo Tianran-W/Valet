@@ -6,14 +6,16 @@ import 'inventory_item_tile.dart';
 class InventoryItemList extends StatelessWidget {
   final List<Item> items;
   final Function(Item) onItemTap;
-  final Function(Item) onItemEdit;
+  final Function(Item) onItemBorrow;
+  final Function(Item) onItemReturn;
   final Function(Item) onItemMoreActions;
 
   const InventoryItemList({
     super.key,
     required this.items,
     required this.onItemTap,
-    required this.onItemEdit,
+    required this.onItemBorrow,
+    required this.onItemReturn,
     required this.onItemMoreActions,
   });
 
@@ -31,7 +33,8 @@ class InventoryItemList extends StatelessWidget {
                 return InventoryItemTile(
                   item: item,
                   onTap: onItemTap,
-                  onEdit: onItemEdit,
+                  onBorrow: onItemBorrow,
+                  onReturn: onItemReturn,
                   onMoreActions: onItemMoreActions,
                 );
               },

@@ -87,7 +87,7 @@ class _ERPHomePageState extends State<ERPHomePage> {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    '企业管理系统',
+                    '科研设备管理',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,

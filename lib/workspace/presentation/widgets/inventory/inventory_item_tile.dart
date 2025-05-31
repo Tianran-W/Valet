@@ -6,14 +6,16 @@ import 'status_tag.dart';
 class InventoryItemTile extends StatelessWidget {
   final Item item;
   final Function(Item) onTap;
-  final Function(Item) onEdit;
+  final Function(Item) onBorrow;
+  final Function(Item) onReturn;
   final Function(Item) onMoreActions;
 
   const InventoryItemTile({
     super.key,
     required this.item,
     required this.onTap,
-    required this.onEdit,
+    required this.onBorrow,
+    required this.onReturn,
     required this.onMoreActions,
   });
 
@@ -55,9 +57,14 @@ class InventoryItemTile extends StatelessWidget {
           
           // 操作按钮
           IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () => onEdit(item),
-            tooltip: '编辑',
+            icon: const Icon(Icons.send),
+            onPressed: () => onBorrow(item),
+            tooltip: '借用',
+          ),
+          IconButton(
+            icon: const Icon(Icons.assignment_return),
+            onPressed: () => onReturn(item),
+            tooltip: '归还',
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),

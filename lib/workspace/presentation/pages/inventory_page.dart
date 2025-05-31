@@ -81,20 +81,19 @@ class _InventoryPageState extends State<InventoryPage> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _showEditItemDialog(item);
+              _showBorrowItemDialog(item);
             },
-            child: const Text('编辑'),
+            child: const Text('借用'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showReturnItemDialog(item);
+            },
+            child: const Text('归还'),
           ),
         ],
       ),
-    );
-  }
-
-  // 显示编辑物品对话框
-  void _showEditItemDialog(Item item) {
-    // 在实际应用中，这里会实现编辑功能
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('编辑物品: ${item.name} (功能开发中)')),
     );
   }
 
@@ -103,6 +102,22 @@ class _InventoryPageState extends State<InventoryPage> {
     // 在实际应用中，这里会实现添加功能
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('添加新物品功能开发中')),
+    );
+  }
+
+  // 显示借用物品对话框
+  void _showBorrowItemDialog(Item item) {
+    // 在实际应用中，这里会实现借用功能
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('编辑物品: ${item.name} (功能开发中)')),
+    );
+  }
+
+  // 显示归还物品对话框
+  void _showReturnItemDialog(Item item) {
+    // 在实际应用中，这里会实现归还功能
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('编辑物品: ${item.name} (功能开发中)')),
     );
   }
 
@@ -217,7 +232,8 @@ class _InventoryPageState extends State<InventoryPage> {
               child: InventoryItemList(
                 items: _filteredItems,
                 onItemTap: _showItemDetails,
-                onItemEdit: _showEditItemDialog,
+                onItemBorrow: _showBorrowItemDialog,
+                onItemReturn: _showReturnItemDialog,
                 onItemMoreActions: (item) {
                   // 显示更多操作菜单
                   ScaffoldMessenger.of(context).showSnackBar(

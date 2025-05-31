@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const ERPHomePage(title: 'ERP System Dashboard'),
+      home: const ERPHomePage(title: '科研设备管理 仪表盘'),
     );
   }
 }
