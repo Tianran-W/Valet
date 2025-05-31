@@ -14,6 +14,7 @@ class ItemExamples {
         quantity: 2,
         status: InventoryStatus.inStock,
         isValuable: true, // 贵重物品
+        serialNumber: 'SN20240315-3DP001', // 添加SN码
       ),
       Item(
         id: 'MECH-002',
@@ -22,6 +23,7 @@ class ItemExamples {
         quantity: 1,
         status: InventoryStatus.maintenance,
         isValuable: true, // 贵重物品
+        serialNumber: 'SN20230517-CNC002', // 添加SN码
       ),
       Item(
         id: 'MECH-003',
@@ -31,6 +33,7 @@ class ItemExamples {
         status: InventoryStatus.onLoan,
         borrowedBy: '张三',
         isValuable: true, // 贵重物品
+        serialNumber: 'SN20230128-LTH003', // 添加SN码
       ),
       
       // 电控类物品示例
@@ -65,6 +68,7 @@ class ItemExamples {
         quantity: 1,
         status: InventoryStatus.inStock,
         isValuable: true, // 贵重物品
+        serialNumber: 'SN20240420-HSC001', // 添加SN码
       ),
       Item(
         id: 'VIS-002',
@@ -73,6 +77,7 @@ class ItemExamples {
         quantity: 2,
         status: InventoryStatus.maintenance,
         isValuable: true, // 贵重物品
+        serialNumber: 'SN20230822-DPC002', // 添加SN码
       ),
       Item(
         id: 'VIS-003',

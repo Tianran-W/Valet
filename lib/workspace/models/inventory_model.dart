@@ -33,7 +33,8 @@ class Item {
   final int quantity;
   final InventoryStatus status;
   final String? borrowedBy;
-  final bool isValuable; // 是否为贵重物品
+  final bool isValuable;
+  final String? serialNumber;
 
   const Item({
     required this.id,
@@ -42,7 +43,8 @@ class Item {
     required this.quantity,
     required this.status,
     this.borrowedBy,
-    this.isValuable = false, // 默认为非贵重物品
+    this.isValuable = false,
+    this.serialNumber,
   });
   
   /// 从JSON映射创建Item实例
@@ -55,6 +57,7 @@ class Item {
       status: InventoryStatus.fromString(json['status'] as String),
       borrowedBy: json['borrowed_by'] as String?,
       isValuable: json['is_valuable'] as bool? ?? false,
+      serialNumber: json['serial_number'] as String?,
     );
   }
   
@@ -68,6 +71,7 @@ class Item {
       'status': status.displayName,
       'is_valuable': isValuable,
       if (borrowedBy != null) 'borrowed_by': borrowedBy,
+      if (serialNumber != null) 'serial_number': serialNumber,
     };
   }
 }

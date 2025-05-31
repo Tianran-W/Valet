@@ -109,7 +109,7 @@ class _InventoryPageState extends State<InventoryPage> {
   void _showBorrowItemDialog(Item item) {
     // 在实际应用中，这里会实现借用功能
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('编辑物品: ${item.name} (功能开发中)')),
+      SnackBar(content: Text('借用物品: ${item.name} (功能开发中)')),
     );
   }
 
@@ -117,7 +117,7 @@ class _InventoryPageState extends State<InventoryPage> {
   void _showReturnItemDialog(Item item) {
     // 在实际应用中，这里会实现归还功能
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('编辑物品: ${item.name} (功能开发中)')),
+      SnackBar(content: Text('归还物品: ${item.name} (功能开发中)')),
     );
   }
 

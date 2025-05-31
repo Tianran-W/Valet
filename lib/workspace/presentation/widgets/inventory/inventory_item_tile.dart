@@ -44,7 +44,11 @@ class InventoryItemTile extends StatelessWidget {
             ),
         ],
       ),
-      subtitle: Text(item.category),
+      subtitle: Text(
+        item.serialNumber != null && item.serialNumber!.isNotEmpty
+        ? '${item.category} | ${item.serialNumber}'
+        : item.category,
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
