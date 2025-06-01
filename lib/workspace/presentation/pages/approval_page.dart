@@ -186,12 +186,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
                         );
                       },
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.search),
-                      tooltip: '搜索审批',
-                      onPressed: _isLoading ? null : _showSearchDialog,
-                    ),
-                    const SizedBox(width: 8),
                     FilledButton.icon(
                       onPressed: _isLoading ? null : _showCreateApprovalDialog,
                       icon: const Icon(Icons.add),
@@ -354,7 +348,8 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
               approvalId: approval.id,
               isApprove: isApprove,
               userId: _currentUserId,
-              remark: remark,
+              materialId: int.parse(approval.materialId),
+              approvalReason: approval.reason,
             );
             
             // 重新加载数据
@@ -480,48 +475,4 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
       ),
     );
   }
-
-  // 显示搜索对话框
-  void _showSearchDialog() async {
-    try {
-      // 获取所有审批数据用于搜索
-      final allApprovals = await _approvalService.getAllApprovals(_currentUserId);
-      
-      if (allApprovals.isEmpty) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('暂无审批数据可搜索')),
-          );
-        }
-        return;
-      }
-      
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => ApprovalSearchDialog(
-            approvals: allApprovals,
-            onSelect: (approval) {
-              // 根据审批类型决定显示哪种详情对话框
-              if (_myApplications.any((item) => item.id == approval.id)) {
-                _showMyApplicationDetailDialog(approval);
-              } else {
-                _showApprovalDetailDialog(approval);
-              }
-            },
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('获取搜索数据失败: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
 }

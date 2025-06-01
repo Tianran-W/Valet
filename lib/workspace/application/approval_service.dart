@@ -26,22 +26,6 @@ class ApprovalService {
     }
   }
 
-  /// 获取已审批列表  
-  /// [userId]: 当前用户ID
-  Future<List<Approval>> getApprovedItems(int userId) async {
-    try {
-      logger.info('正在获取已审批列表, userId=$userId', tag: _tag);
-      
-      final result = await _apiService.workspaceApi.getApprovedItems(userId);
-      
-      logger.debug('成功获取已审批列表, 共${result.length}条记录', tag: _tag);
-      return result;
-    } catch (e) {
-      logger.error('获取已审批列表失败', tag: _tag, error: e, stackTrace: StackTrace.current);
-      throw Exception('获取已审批列表失败: $e');
-    }
-  }
-
   /// 获取我发起的审批申请
   /// [userId]: 当前用户ID  
   Future<List<Approval>> getMyApplications(int userId) async {
@@ -80,21 +64,26 @@ class ApprovalService {
   /// [isApprove]: 是否通过
   /// [remark]: 审批备注
   /// [userId]: 审批人ID
-  Future<Approval> processApproval({
+  /// [materialId]: 物资ID
+  /// [approvalReason]: 审批原因
+  Future<bool> processApproval({
     required String approvalId,
     required bool isApprove,
     required int userId,
-    String? remark,
+    required int materialId,
+    required String approvalReason,
   }) async {
     try {
       logger.info('正在处理审批: $approvalId, 结果: ${isApprove ? '通过' : '驳回'}', tag: _tag);
-      logger.debug('审批处理参数: userId=$userId, remark=$remark', tag: _tag);
+      logger.debug('审批处理参数: userId=$userId, materialId=$materialId, approvalReason=$approvalReason', tag: _tag);
+      logger.debug('审批id: $approvalId', tag: _tag);
       
       final result = await _apiService.workspaceApi.processApproval(
         approvalId: approvalId,
         isApprove: isApprove,
         userId: userId,
-        remark: remark,
+        materialId: materialId,
+        approvalReason: approvalReason,
       );
       
       logger.debug('成功处理审批: $approvalId', tag: _tag);
@@ -149,33 +138,6 @@ class ApprovalService {
     } catch (e) {
       logger.error('搜索审批申请失败', tag: _tag, error: e, stackTrace: StackTrace.current);
       throw Exception('搜索审批申请失败: $e');
-    }
-  }
-
-  /// 获取所有审批数据（用于搜索）
-  /// [userId]: 当前用户ID
-  Future<List<Approval>> getAllApprovals(int userId) async {
-    try {
-      logger.info('正在获取所有审批数据用于搜索', tag: _tag);
-      
-      // 并行获取三个列表
-      final futures = await Future.wait([
-        getPendingApprovals(userId),
-        getApprovedItems(userId),
-        getMyApplications(userId),
-      ]);
-      
-      final allApprovals = <Approval>[
-        ...futures[0],
-        ...futures[1], 
-        ...futures[2],
-      ];
-      
-      logger.debug('成功获取所有审批数据, 共${allApprovals.length}条记录', tag: _tag);
-      return allApprovals;
-    } catch (e) {
-      logger.error('获取所有审批数据失败', tag: _tag, error: e, stackTrace: StackTrace.current);
-      throw Exception('获取所有审批数据失败: $e');
     }
   }
 }

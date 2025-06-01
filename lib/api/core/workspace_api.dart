@@ -158,21 +158,25 @@ class WorkspaceApi {
   /// [isApprove]: 是否通过
   /// [remark]: 审批备注
   /// [userId]: 审批人ID
-  Future<Approval> processApproval({
+  /// [materialId]: 物资ID
+  /// [approvalReason]: 审批原因
+  Future<bool> processApproval({
     required String approvalId,
     required bool isApprove,
     required int userId,
-    String? remark,
+    required int materialId,
+    required String approvalReason,
   }) async {
     try {
       final Map<String, dynamic> body = {
-        'approvalId': approvalId,
-        'isApprove': isApprove,
-        'userId': userId,
-        if (remark != null && remark.isNotEmpty) 'remark': remark,
+        'approval_id': approvalId,
+        'user_id': userId,
+        'material_id': materialId,
+        'approval_result': isApprove,
+        'approval_reason': approvalReason,
       };
-      final Map<String, dynamic> response = await _apiClient.post('/approval/process', body: body);
-      return Approval.fromMap(response);
+      await _apiClient.post('/admin/ApprovalResult', body: body);
+      return true;
     } catch (e) {
       logger.error('处理审批失败: $e');
       throw Exception('处理审批失败: $e');

@@ -37,7 +37,7 @@ class Approval {
   // 从Map构建对象
   factory Approval.fromMap(Map<String, dynamic> map) {
     return Approval(
-      id: map['id']?.toString() ?? map['pending']?.toString() ?? '',
+      id: map['approvalId']?.toString() ?? '',
       materialId: map['materialId']?.toString() ?? '',
       materialName: map['materialName']?.toString() ?? '',
       applicantId: map['userId']?.toString() ?? map['applicantId']?.toString() ?? '',
