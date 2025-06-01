@@ -22,6 +22,25 @@ class InventoryService {
       throw Exception('获取物品类别列表失败: $e');
     }
   }
+  
+  /// 添加新物品类别
+  /// [name]: 类别名称
+  Future<void> addCategory({
+    required String name,
+  }) async {
+    try {
+      logger.info('正在添加新物品类别: $name', tag: _tag);
+      
+      await _apiService.workspaceApi.addCategory(
+        name: name,
+      );
+      
+      logger.debug('成功添加新物品类别: $name', tag: _tag);
+    } catch (e) {
+      logger.error('添加物品类别失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('添加物品类别失败: $e');
+    }
+  }
 
   /// 获取物品列表
   /// [category]: 物品分类过滤条件

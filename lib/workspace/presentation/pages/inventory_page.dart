@@ -168,6 +168,29 @@ class _InventoryPageState extends State<InventoryPage> {
     }
   }
 
+  // 显示添加分类对话框
+  Future<void> _showAddCategoryDialog() async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) => AddCategoryDialog(
+        inventoryService: _inventoryService,
+      ),
+    );
+    
+    if (result == true && mounted) {
+      // 显示成功提示
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('分类添加成功'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      // 重新加载数据
+      _loadInventoryItems();
+    }
+  }
+
   // 显示借用物品对话框
   Future<void> _showBorrowItemDialog(Item item) async {
     // 只有在库可借的物品才能借用
@@ -398,6 +421,12 @@ class _InventoryPageState extends State<InventoryPage> {
                       },
                       icon: const Icon(Icons.download),
                       label: const Text('导出'),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      onPressed: _showAddCategoryDialog,
+                      icon: const Icon(Icons.category),
+                      label: const Text('添加分类'),
                     ),
                     const SizedBox(width: 8),
                     FilledButton.icon(

@@ -16,6 +16,19 @@ class WorkspaceApi {
     final List<dynamic> response = await _apiClient.get('/admin/materialsCategories');
     return response.map((json) => Category.fromJson(json)).toList();
   }
+  
+  /// 添加新物品类别
+  /// [name]: 类别名称
+  Future<bool> addCategory({
+    required String name,
+  }) async {
+    final Map<String, dynamic> body = {
+      'categoryName': name,
+    };
+    
+    await _apiClient.post('/admin/materialsNewCategories', body: body);
+    return true;
+  }
 
   /// 获取所有物品
   /// [category]: 物品分类
