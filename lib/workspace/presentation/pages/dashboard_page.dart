@@ -27,21 +27,21 @@ class DashboardPage extends StatelessWidget {
             children: [
               Expanded(
                 child: DashboardCard(
-                  title: '今日销售额',
-                  value: '¥158,200',
-                  icon: Icons.trending_up,
+                  title: '设备总数量',
+                  value: '1,358',
+                  icon: Icons.science,
                   color: Colors.blue,
-                  change: '+15.3%',
+                  change: '+3.2%',
                 ),
               ),
               SizedBox(width: 16),
               Expanded(
                 child: DashboardCard(
-                  title: '本月订单数',
-                  value: '1,204',
-                  icon: Icons.shopping_bag,
+                  title: '本月借用次数',
+                  value: '245',
+                  icon: Icons.swap_horiz,
                   color: Colors.orange,
-                  change: '+5.7%',
+                  change: '+8.5%',
                 ),
               ),
             ],
@@ -51,21 +51,21 @@ class DashboardPage extends StatelessWidget {
             children: [
               Expanded(
                 child: DashboardCard(
-                  title: '库存物资',
-                  value: '3,452',
-                  icon: Icons.inventory_2,
-                  color: Colors.green,
-                  change: '-2.1%',
+                  title: '维修中设备',
+                  value: '32',
+                  icon: Icons.build,
+                  color: Colors.red,
+                  change: '-4.1%',
                 ),
               ),
               SizedBox(width: 16),
               Expanded(
                 child: DashboardCard(
-                  title: '员工出勤率',
-                  value: '94.3%',
-                  icon: Icons.people,
-                  color: Colors.purple,
-                  change: '+1.2%',
+                  title: '设备利用率',
+                  value: '78.6%',
+                  icon: Icons.analytics,
+                  color: Colors.green,
+                  change: '+2.3%',
                 ),
               ),
             ],
@@ -81,19 +81,19 @@ class DashboardPage extends StatelessWidget {
             child: Column(
               children: [
                 TodoItem(
-                  title: '确认月度财务报表',
+                  title: '完成实验室设备年度盘点',
                   deadline: '今天',
                   priority: 'high',
                 ),
                 Divider(height: 1),
                 TodoItem(
-                  title: '审批销售部门预算',
+                  title: '审核精密仪器采购申请',
                   deadline: '明天',
                   priority: 'medium',
                 ),
                 Divider(height: 1),
                 TodoItem(
-                  title: '与供应商会议',
+                  title: '协调机械设备维修事宜',
                   deadline: '后天',
                   priority: 'low',
                 ),
@@ -111,21 +111,21 @@ class DashboardPage extends StatelessWidget {
             child: Column(
               children: [
                 ActivityItem(
-                  title: '新订单 #1058 已创建',
+                  title: '激光切割机 #A2201 已借出',
                   time: '10分钟前',
-                  user: '销售部 - 张经理',
+                  user: '材料实验室 - 陈研究员',
                 ),
                 Divider(height: 1),
                 ActivityItem(
-                  title: '发票 #2213 已支付',
+                  title: '高精度示波器 #E0512 已归还',
                   time: '1小时前',
-                  user: '财务部 - 李会计',
+                  user: '电子实验室 - 王工程师',
                 ),
                 Divider(height: 1),
                 ActivityItem(
-                  title: '新员工 王小明 已入职',
+                  title: '新设备 3D扫描仪 已入库',
                   time: '今天上午',
-                  user: '人事部 - 赵总监',
+                  user: '设备管理部 - 李主管',
                 ),
               ],
             ),
