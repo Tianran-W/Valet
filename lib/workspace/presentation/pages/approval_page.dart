@@ -4,6 +4,7 @@ import 'package:valet/api/core/api_service.dart';
 import 'package:valet/workspace/application/approval_service.dart';
 import 'package:valet/workspace/models/approval_model.dart';
 import 'package:valet/workspace/presentation/widgets/approval/approval_widgets.dart';
+import 'package:valet/workspace/presentation/widgets/stat_card.dart';
 
 /// 请求审批页面
 class ApprovalPage extends StatefulWidget {
@@ -273,14 +274,14 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
   Widget _buildStatCards() {
     return Row(
       children: [
-        ApprovalStatCard(
+        StatCardWidget(
           title: '待审批',
           value: _approvals.length.toString(),
           icon: Icons.pending_actions,
           color: Colors.blue,
         ),
         const SizedBox(width: 16),
-        ApprovalStatCard(
+        StatCardWidget(
           title: '我发起的',
           value: _myApplications.length.toString(),
           icon: Icons.send,
@@ -325,7 +326,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
                 return MyApplicationTile(
                   application: approval,
                   onTap: _showMyApplicationDetailDialog,
-                  onWithdraw: _showWithdrawDialog,
                 );
               },
             ),
@@ -355,7 +355,7 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
             // 重新加载数据
             await _loadApprovalData();
             
-            if (mounted) {
+            if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('已${isApprove ? '通过' : '驳回'}审批'),
@@ -364,7 +364,7 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
               );
             }
           } catch (e) {
-            if (mounted) {
+            if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('审批处理失败: $e'),
@@ -413,7 +413,7 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
             // 重新加载数据
             await _loadApprovalData();
             
-            if (mounted) {
+            if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('审批申请已提交'),
@@ -422,50 +422,10 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
               );
             }
           } catch (e) {
-            if (mounted) {
+            if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('提交申请失败: $e'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          }
-        },
-      ),
-    );
-  }
-
-  // 显示撤回申请对话框
-  void _showWithdrawDialog(Approval approval) {
-    showDialog(
-      context: context,
-      builder: (context) => WithdrawApprovalDialog(
-        approval: approval,
-        onWithdraw: (approval) async {
-          // 处理撤回逻辑
-          try {
-            await _approvalService.withdrawApproval(
-              approvalId: approval.id,
-              userId: _currentUserId,
-            );
-            
-            // 重新加载数据
-            await _loadApprovalData();
-            
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('申请已撤回'),
-                  backgroundColor: Colors.orange,
-                ),
-              );
-            }
-          } catch (e) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('撤回申请失败: $e'),
                   backgroundColor: Colors.red,
                 ),
               );

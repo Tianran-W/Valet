@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
-import 'stat_card.dart';
+import 'package:valet/workspace/presentation/widgets/stat_card.dart';
 
 /// 库存统计组件
 class InventoryStats extends StatelessWidget {

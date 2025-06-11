@@ -1,8 +1,8 @@
 import 'package:valet/api/core/logger_service.dart';
 
-import 'api_client.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/models/approval_model.dart';
+import 'api_client.dart';
 
 /// 工作空间 API 类，处理工作空间相关的 API 请求
 class WorkspaceApi {
@@ -134,25 +134,6 @@ class WorkspaceApi {
     return response.map((json) => Approval.fromMap(json)).toList();
   }
 
-  /// 获取已审批列表  
-  /// [userId]: 当前用户ID
-  Future<List<Approval>> getApprovedItems(int userId) async {
-    final List<dynamic> response = await _apiClient.get('/approval/approved/$userId');
-    return response.map((json) => Approval.fromMap(json)).toList();
-  }
-
-  /// 获取我发起的审批申请
-  /// [userId]: 当前用户ID  
-  Future<List<Approval>> getMyApplications(int userId) async {
-    try {
-      final List<dynamic> response = await _apiClient.get('/approval/my-applications/$userId');
-      return response.map((json) => Approval.fromMap(json)).toList();
-    } catch (e) {
-      logger.error('获取我的申请列表失败: $e');
-      throw Exception('获取我的申请列表失败: $e');
-    }
-  }
-
   /// 提交新的审批申请
   /// [approval]: 审批申请对象
   Future<Approval> submitApproval(Approval approval) async {
@@ -193,46 +174,6 @@ class WorkspaceApi {
     } catch (e) {
       logger.error('处理审批失败: $e');
       throw Exception('处理审批失败: $e');
-    }
-  }
-
-  /// 撤回审批申请
-  /// [approvalId]: 审批ID
-  /// [userId]: 申请人ID
-  Future<bool> withdrawApproval({
-    required String approvalId,
-    required int userId,
-  }) async {
-    try {
-      final Map<String, dynamic> body = {
-        'approvalId': approvalId,
-        'userId': userId,
-      };
-      await _apiClient.post('/approval/withdraw', body: body);
-      return true;
-    } catch (e) {
-      logger.error('撤回审批申请失败: $e');
-      throw Exception('撤回审批申请失败: $e');
-    }
-  }
-
-  /// 搜索审批申请
-  /// [query]: 搜索关键词
-  /// [userId]: 当前用户ID
-  Future<List<Approval>> searchApprovals({
-    required String query,
-    required int userId,
-  }) async {
-    try {
-      final Map<String, dynamic> body = {
-        'query': query,
-        'userId': userId,
-      };
-      final List<dynamic> response = await _apiClient.post('/approval/search', body: body);
-      return response.map((json) => Approval.fromMap(json)).toList();
-    } catch (e) {
-      logger.error('搜索审批申请失败: $e');
-      throw Exception('搜索审批申请失败: $e');
     }
   }
 }

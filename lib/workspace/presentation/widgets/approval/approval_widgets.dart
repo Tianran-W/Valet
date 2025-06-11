@@ -1,5 +1,4 @@
 // 审批组件导出文件
-export 'stat_card.dart';
 export 'pending_approval_tile.dart';
 export 'approved_item_tile.dart';
 export 'my_application_tile.dart';

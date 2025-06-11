@@ -26,22 +26,6 @@ class ApprovalService {
     }
   }
 
-  /// 获取我发起的审批申请
-  /// [userId]: 当前用户ID  
-  Future<List<Approval>> getMyApplications(int userId) async {
-    try {
-      logger.info('正在获取我的申请列表, userId=$userId', tag: _tag);
-      
-      final result = await _apiService.workspaceApi.getMyApplications(userId);
-      
-      logger.debug('成功获取我的申请列表, 共${result.length}条记录', tag: _tag);
-      return result;
-    } catch (e) {
-      logger.error('获取我的申请列表失败', tag: _tag, error: e, stackTrace: StackTrace.current);
-      throw Exception('获取我的申请列表失败: $e');
-    }
-  }
-
   /// 提交新的审批申请
   /// [approval]: 审批申请对象
   Future<Approval> submitApproval(Approval approval) async {
@@ -91,53 +75,6 @@ class ApprovalService {
     } catch (e) {
       logger.error('处理审批失败', tag: _tag, error: e, stackTrace: StackTrace.current);
       throw Exception('处理审批失败: $e');
-    }
-  }
-
-  /// 撤回审批申请
-  /// [approvalId]: 审批ID
-  /// [userId]: 申请人ID
-  Future<bool> withdrawApproval({
-    required String approvalId,
-    required int userId,
-  }) async {
-    try {
-      logger.info('正在撤回审批申请: $approvalId', tag: _tag);
-      logger.debug('撤回参数: userId=$userId', tag: _tag);
-      
-      final result = await _apiService.workspaceApi.withdrawApproval(
-        approvalId: approvalId,
-        userId: userId,
-      );
-      
-      logger.debug('成功撤回审批申请: $approvalId', tag: _tag);
-      return result;
-    } catch (e) {
-      logger.error('撤回审批申请失败', tag: _tag, error: e, stackTrace: StackTrace.current);
-      throw Exception('撤回审批申请失败: $e');
-    }
-  }
-
-  /// 搜索审批申请
-  /// [query]: 搜索关键词
-  /// [userId]: 当前用户ID
-  Future<List<Approval>> searchApprovals({
-    required String query,
-    required int userId,
-  }) async {
-    try {
-      logger.info('正在搜索审批申请: $query', tag: _tag);
-      
-      final result = await _apiService.workspaceApi.searchApprovals(
-        query: query,
-        userId: userId,
-      );
-      
-      logger.debug('搜索审批申请完成, 共${result.length}条记录', tag: _tag);
-      return result;
-    } catch (e) {
-      logger.error('搜索审批申请失败', tag: _tag, error: e, stackTrace: StackTrace.current);
-      throw Exception('搜索审批申请失败: $e');
     }
   }
 }

@@ -1,6 +1,5 @@
 // 库存组件导出文件
 export 'detail_row.dart';
-export 'stat_card.dart';
 export 'status_tag.dart';
 export 'inventory_filters.dart';
 export 'inventory_stats.dart';
