@@ -26,23 +26,6 @@ class ApprovalService {
     }
   }
 
-  /// 提交新的审批申请
-  /// [approval]: 审批申请对象
-  Future<Approval> submitApproval(Approval approval) async {
-    try {
-      logger.info('正在提交审批申请: ${approval.materialName}', tag: _tag);
-      logger.debug('审批申请详情: id=${approval.id}, 类型=物资借用申请', tag: _tag);
-      
-      final result = await _apiService.workspaceApi.submitApproval(approval);
-      
-      logger.debug('成功提交审批申请: ${approval.materialName}', tag: _tag);
-      return result;
-    } catch (e) {
-      logger.error('提交审批申请失败', tag: _tag, error: e, stackTrace: StackTrace.current);
-      throw Exception('提交审批申请失败: $e');
-    }
-  }
-
   /// 审批处理（通过或驳回）
   /// [approvalId]: 审批ID
   /// [isApprove]: 是否通过

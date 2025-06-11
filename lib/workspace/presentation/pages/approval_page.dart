@@ -187,11 +187,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
                         );
                       },
                     ),
-                    FilledButton.icon(
-                      onPressed: _isLoading ? null : _showCreateApprovalDialog,
-                      icon: const Icon(Icons.add),
-                      label: const Text('发起审批'),
-                    ),
                   ],
                 ),
               ],
@@ -396,42 +391,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
       builder: (context) => ApprovalDetailDialog(
         approval: application,
         title: '申请详情',
-      ),
-    );
-  }
-
-  // 显示发起审批对话框
-  void _showCreateApprovalDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => CreateApprovalDialog(
-        onSubmit: (approval) async {
-          // 处理提交逻辑
-          try {
-            await _approvalService.submitApproval(approval);
-            
-            // 重新加载数据
-            await _loadApprovalData();
-            
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('审批申请已提交'),
-                  backgroundColor: Colors.blue,
-                ),
-              );
-            }
-          } catch (e) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('提交申请失败: $e'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          }
-        },
       ),
     );
   }

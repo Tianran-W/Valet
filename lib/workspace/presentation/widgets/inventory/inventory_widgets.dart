@@ -1,10 +1,10 @@
 // 库存组件导出文件
-export 'detail_row.dart';
+export '../detail_row.dart';
 export 'status_tag.dart';
 export 'inventory_filters.dart';
 export 'inventory_stats.dart';
-export 'inventory_item_list.dart';
-export 'inventory_item_tile.dart';
+export 'item_list.dart';
+export 'item_tile.dart';
 export 'add_item_dialog.dart';
 export 'add_category_dialog.dart';
 export 'borrow_item_dialog.dart';

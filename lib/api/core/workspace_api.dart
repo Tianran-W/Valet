@@ -134,19 +134,6 @@ class WorkspaceApi {
     return response.map((json) => Approval.fromMap(json)).toList();
   }
 
-  /// 提交新的审批申请
-  /// [approval]: 审批申请对象
-  Future<Approval> submitApproval(Approval approval) async {
-    try {
-      final Map<String, dynamic> body = approval.toMap();
-      final Map<String, dynamic> response = await _apiClient.post('/approval/submit', body: body);
-      return Approval.fromMap(response);
-    } catch (e) {
-      logger.error('提交审批申请失败: $e');
-      throw Exception('提交审批申请失败: $e');
-    }
-  }
-
   /// 审批处理（通过或驳回）
   /// [approvalId]: 审批ID
   /// [isApprove]: 是否通过

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
-import 'inventory_item_tile.dart';
+import 'item_tile.dart';
 
 /// 库存物品列表组件
 class InventoryItemList extends StatelessWidget {

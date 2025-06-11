@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:valet/workspace/models/approval_model.dart';
-import 'package:valet/workspace/presentation/widgets/approval/detail_row.dart';
+import 'package:valet/workspace/presentation/widgets/detail_row.dart';
 
 /// 审批详情对话框
 class ApprovalDetailDialog extends StatelessWidget {
