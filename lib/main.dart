@@ -19,21 +19,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:logger/logger.dart';
+
 import 'package:valet/workspace/presentation/home/erp_home_page.dart';
 import 'package:valet/api/core/logger_service.dart';
 
 void main() async {
   // 初始化日志服务
-  logger.setLogLevel(kDebugMode ? LogLevel.debug : LogLevel.info);
-  logger.enableConsole(true);
+  logger.setLogLevel(Level.debug);
   logger.info('应用程序启动', tag: 'App');
   
   // 显示版权和许可信息
   if (kDebugMode) {
-    print('Valet  Copyright (C) 2025 HITCRT');
-    print('This program comes with ABSOLUTELY NO WARRANTY');
-    print('This is free software, and you are welcome to redistribute it');
-    print('under certain conditions; see the LICENSE file for details.');
+    logger.info('Valet  Copyright (C) 2025 HITCRT');
+    logger.info('This program comes with ABSOLUTELY NO WARRANTY');
+    logger.info('This is free software, and you are welcome to redistribute it');
+    logger.info('under certain conditions; see the LICENSE file for details.');
   }
 
   // 初始化环境变量

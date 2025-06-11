@@ -1,124 +1,86 @@
 import 'package:flutter/foundation.dart';
+import 'package:logger/logger.dart';
 
-/// 日志级别枚举
-enum LogLevel {
-  debug,
-  info,
-  warning,
-  error,
-  fatal,
-}
-
-/// 日志服务类，提供统一的日志记录功能
+/// 日志服务类，提供统一的日志记录功能，基于logger包实现
 class LoggerService {
   /// 单例实例
   static final LoggerService _instance = LoggerService._internal();
 
-  /// 当前日志级别，默认为 info
-  LogLevel _currentLevel = LogLevel.info;
+  /// Logger实例
+  late final Logger _logger;
 
-  /// 是否启用控制台输出
-  bool _enableConsole = true;
+  // 预留字段，将在实现文件输出时使用
+  // bool _enableFile = false;
+  // String? _logFilePath;
 
-  /// 是否启用文件输出（预留）
-  bool _enableFile = false;
-
-  /// 日志文件路径（预留）
-  String? _logFilePath;
+  /// 当前过滤器
+  Level _currentLevel = Level.info;
 
   /// 私有构造函数
-  LoggerService._internal();
+  LoggerService._internal() {
+    // 初始化Logger
+    _logger = Logger(
+      printer: PrettyPrinter(
+        methodCount: 0,  // 方法堆栈数量
+        errorMethodCount: 8,  // 错误时堆栈数量
+        lineLength: 120,  // 每行长度
+        colors: true,  // 彩色输出
+        printEmojis: true,  // 打印表情
+        dateTimeFormat: DateTimeFormat.dateAndTime,  // 日期时间格式
+      ),
+      level: _currentLevel,  // 默认日志级别
+      filter: ProductionFilter(),  // 只在非发布版本中打印
+    );
+  }
 
   /// 获取单例实例
   factory LoggerService() => _instance;
 
   /// 设置日志级别
-  void setLogLevel(LogLevel level) {
+  void setLogLevel(Level level) {
     _currentLevel = level;
+    Logger.level = level;
   }
 
-  /// 启用/禁用控制台输出
-  void enableConsole(bool enable) {
-    _enableConsole = enable;
-  }
-
-  /// 启用/禁用文件输出（预留）
+  /// 启用/禁用文件输出
   void enableFileOutput(bool enable, {String? filePath}) {
-    _enableFile = enable;
+    // TODO: 实现文件输出，需要自定义LogOutput
     if (enable && filePath != null) {
-      _logFilePath = filePath;
+      // 未来实现文件输出的占位符
+      // 可以使用FileOutput类来实现文件日志
     }
   }
 
   /// 记录调试级别日志
   void debug(String message, {String? tag, Object? error, StackTrace? stackTrace}) {
-    _log(LogLevel.debug, message, tag: tag, error: error, stackTrace: stackTrace);
+    final taggedMessage = tag != null ? '[$tag] $message' : message;
+    if (kDebugMode) {
+      _logger.d(taggedMessage, error: error, stackTrace: stackTrace);
+    }
   }
 
   /// 记录信息级别日志
   void info(String message, {String? tag, Object? error, StackTrace? stackTrace}) {
-    _log(LogLevel.info, message, tag: tag, error: error, stackTrace: stackTrace);
+    final taggedMessage = tag != null ? '[$tag] $message' : message;
+    _logger.i(taggedMessage, error: error, stackTrace: stackTrace);
   }
 
   /// 记录警告级别日志
   void warning(String message, {String? tag, Object? error, StackTrace? stackTrace}) {
-    _log(LogLevel.warning, message, tag: tag, error: error, stackTrace: stackTrace);
+    final taggedMessage = tag != null ? '[$tag] $message' : message;
+    _logger.w(taggedMessage, error: error, stackTrace: stackTrace);
   }
 
   /// 记录错误级别日志
   void error(String message, {String? tag, Object? error, StackTrace? stackTrace}) {
-    _log(LogLevel.error, message, tag: tag, error: error, stackTrace: stackTrace);
+    final taggedMessage = tag != null ? '[$tag] $message' : message;
+    _logger.e(taggedMessage, error: error, stackTrace: stackTrace);
   }
 
   /// 记录致命错误级别日志
   void fatal(String message, {String? tag, Object? error, StackTrace? stackTrace}) {
-    _log(LogLevel.fatal, message, tag: tag, error: error, stackTrace: stackTrace);
-  }
-
-  /// 内部日志记录方法
-  void _log(LogLevel level, String message, {String? tag, Object? error, StackTrace? stackTrace}) {
-    // 如果当前日志级别低于设置的级别，则不记录
-    if (level.index < _currentLevel.index) {
-      return;
-    }
-
-    final DateTime now = DateTime.now();
-    final String formattedDate = '${now.year}-${_twoDigits(now.month)}-${_twoDigits(now.day)}';
-    final String formattedTime = '${_twoDigits(now.hour)}:${_twoDigits(now.minute)}:${_twoDigits(now.second)}.${_threeDigits(now.millisecond)}';
-    final String levelString = level.toString().split('.').last.toUpperCase();
-    final String tagString = tag != null ? '[$tag] ' : '';
-    final String logMessage = '[$formattedDate $formattedTime] [$levelString] $tagString$message';
-
-    // 控制台输出
-    if (_enableConsole) {
-      if (kDebugMode) {
-        print(logMessage);
-        if (error != null) {
-          print('ERROR: $error');
-        }
-        if (stackTrace != null) {
-          print('STACK TRACE: $stackTrace');
-        }
-      }
-    }
-
-    // 文件输出（预留）
-    if (_enableFile && _logFilePath != null) {
-      // TODO: 实现文件输出逻辑
-    }
-  }
-
-  /// 格式化两位数字
-  String _twoDigits(int n) {
-    if (n >= 10) return '$n';
-    return '0$n';
-  }
-
-  /// 格式化三位数字
-  String _threeDigits(int n) {
-    if (n >= 100) return '$n';
-    if (n >= 10) return '0$n';
-    return '00$n';
+    final taggedMessage = tag != null ? '[$tag] $message' : message;
+    _logger.f(taggedMessage, error: error, stackTrace: stackTrace);
   }
 }
 
