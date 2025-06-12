@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:valet/api/core/api_service.dart';
-import 'package:valet/api/core/logger_service.dart';
+import 'package:valet/service/api/api_service.dart';
+import 'package:valet/service/logger_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/presentation/widgets/inventory/inventory_widgets.dart';

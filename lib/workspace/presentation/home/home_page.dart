@@ -5,16 +5,16 @@ import 'package:valet/workspace/presentation/pages/dashboard_page.dart';
 import 'package:valet/workspace/presentation/pages/inventory_page.dart';
 import 'package:valet/workspace/presentation/pages/module_pages.dart';
 
-class ERPHomePage extends StatefulWidget {
-  const ERPHomePage({super.key, required this.title});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<ERPHomePage> createState() => _ERPHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _ERPHomePageState extends State<ERPHomePage> {
+class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   static final List<Widget> _pages = [

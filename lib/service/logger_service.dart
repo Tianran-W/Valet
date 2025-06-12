@@ -4,20 +4,16 @@ import 'package:logger/logger.dart';
 /// 日志服务类，提供统一的日志记录功能，基于logger包实现
 class LoggerService {
   /// 单例实例
-  static final LoggerService _instance = LoggerService._internal();
+  static final LoggerService _instance = LoggerService._init();
 
   /// Logger实例
   late final Logger _logger;
-
-  // 预留字段，将在实现文件输出时使用
-  // bool _enableFile = false;
-  // String? _logFilePath;
 
   /// 当前过滤器
   Level _currentLevel = Level.info;
 
   /// 私有构造函数
-  LoggerService._internal() {
+  LoggerService._init() {
     // 初始化Logger
     _logger = Logger(
       printer: PrettyPrinter(
@@ -40,15 +36,6 @@ class LoggerService {
   void setLogLevel(Level level) {
     _currentLevel = level;
     Logger.level = level;
-  }
-
-  /// 启用/禁用文件输出
-  void enableFileOutput(bool enable, {String? filePath}) {
-    // TODO: 实现文件输出，需要自定义LogOutput
-    if (enable && filePath != null) {
-      // 未来实现文件输出的占位符
-      // 可以使用FileOutput类来实现文件日志
-    }
   }
 
   /// 记录调试级别日志

@@ -1,6 +1,6 @@
-import 'package:valet/api/core/api_service.dart';
+import 'package:valet/service/api/api_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
-import 'package:valet/api/core/logger_service.dart';
+import 'package:valet/service/logger_service.dart';
 
 /// 库存服务类，处理与库存相关的业务逻辑
 class InventoryService {

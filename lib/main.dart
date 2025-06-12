@@ -21,8 +21,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
 
-import 'package:valet/workspace/presentation/home/erp_home_page.dart';
-import 'package:valet/api/core/logger_service.dart';
+import 'package:valet/workspace/presentation/home/home_page.dart';
+import 'package:valet/service/logger_service.dart';
 
 void main() async {
   // 初始化日志服务
@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const ERPHomePage(title: '科研设备管理'),
+      home: const HomePage(title: '科研设备管理'),
     );
   }
 }
