@@ -16,16 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logger/logger.dart';
-
-import 'package:valet/workspace/presentation/home/home_page.dart';
 import 'package:valet/service/logger_service.dart';
+import 'package:valet/startup/startup.dart';
 
-void main() async {
-  // 初始化日志服务
+/// 应用入口点
+Future<void> main() async {
+  // 初始化基本的日志服务
   logger.setLogLevel(Level.debug);
   logger.info('应用程序启动', tag: 'App');
   
@@ -37,26 +35,7 @@ void main() async {
     logger.info('under certain conditions; see the LICENSE file for details.');
   }
 
-  // 初始化环境变量
-  await dotenv.load(fileName: ".env/dev.env");
-
-  // 运行应用
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ERP System',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const HomePage(title: '科研设备管理'),
-    );
-  }
+  await runValet(
+    isAnonymous: false,
+  );
 }
