@@ -7,7 +7,6 @@ import 'package:valet/startup/entry_point.dart';
 import 'package:valet/startup/launch_configuration.dart';
 import 'package:valet/startup/tasks/app_widget.dart';
 import 'package:valet/startup/tasks/feature_flag_task.dart';
-import 'package:valet/startup/tasks/localization.dart';
 import 'package:valet/startup/tasks/platform_error_catcher.dart';
 
 /// 全局依赖注入容器实例
@@ -35,8 +34,6 @@ class ValetRunner {
     final config = LaunchConfiguration(
       version: '1.0.0', // 应用版本，实际项目可从pubspec.yaml或构建配置中读取
       isAnonymousMode: false,
-      isTestMode: false,
-      isDevelopment: true, // 默认为开发环境，实际项目可从构建配置中读取
     );
 
     // 指定应用运行模式
@@ -50,8 +47,6 @@ class ValetRunner {
         PlatformErrorCatcherTask(),
         // 功能标志初始化
         FeatureFlagTask(),
-        // 国际化
-        LocalizationTask(),
         // UI组件初始化
         AppWidgetTask(),
       ],

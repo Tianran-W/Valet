@@ -5,6 +5,7 @@ import 'package:valet/startup/startup.dart';
 
 /// 功能标志管理类
 /// 用于控制应用中的功能开关
+/// TODO: 功能暂未使用
 class FeatureFlags {
   static final FeatureFlags _instance = FeatureFlags._internal();
   factory FeatureFlags() => _instance;
@@ -54,7 +55,7 @@ class FeatureFlagTask extends LaunchTask {
       };
       
       // 设置开发环境特定的功能标志
-      if (configuration.isDevelopment) {
+      if (configuration.integrationMode.isDevelop) {
         baseFlags.addAll({
           'debug_overlay': true,
           'test_features': true,
@@ -62,19 +63,11 @@ class FeatureFlagTask extends LaunchTask {
       }
       
       // 设置测试环境特定的功能标志
-      if (configuration.isTestMode) {
+      if (configuration.integrationMode.isTest) {
         baseFlags.addAll({
           'mock_api': true,
           'fast_animations': true,
         });
-      }
-      
-      // 从配置中应用环境变量中的功能标志
-      if (configuration.envVars.containsKey('feature_flags')) {
-        final envFlags = configuration.envVars['feature_flags'] as Map<String, bool>?;
-        if (envFlags != null) {
-          baseFlags.addAll(envFlags);
-        }
       }
       
       // 应用所有功能标志

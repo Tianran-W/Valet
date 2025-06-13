@@ -20,6 +20,7 @@ class AppWidgetTask extends LaunchTask {
 
     final widget = getIt<EntryPoint>().create(configuration);
 
+    // TODO: Easy Localization做国际化处理
     runApp(MaterialApp(
         title: 'ERP System',
         debugShowCheckedModeBanner: false,
