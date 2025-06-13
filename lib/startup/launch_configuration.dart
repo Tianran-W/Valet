@@ -31,13 +31,16 @@ class LaunchConfiguration {
   LaunchConfiguration({
     this.isAnonymousMode = false,
     required this.version,
-  }) {
+  }) : integrationMode = _determineIntegrationMode();
+
+  /// 根据当前环境确定集成模式
+  static IntegrationMode _determineIntegrationMode() {
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
-      integrationMode = IntegrationMode.unitTest;
+      return IntegrationMode.unitTest;
     } else if (kReleaseMode) {
-      integrationMode = IntegrationMode.release;
+      return IntegrationMode.release;
     } else {
-      integrationMode = IntegrationMode.develop;
+      return IntegrationMode.develop;
     }
   }
 
@@ -48,5 +51,5 @@ class LaunchConfiguration {
   final String version;
 
   /// 应用模式
-  late final IntegrationMode integrationMode;
+  final IntegrationMode integrationMode;
 }

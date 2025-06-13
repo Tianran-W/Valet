@@ -9,6 +9,9 @@ import 'package:valet/startup/startup.dart';
 /// 初始化应用的UI组件和主题
 class AppWidgetTask extends LaunchTask {
   @override
+  LaunchTaskType get type => LaunchTaskType.appLauncher;
+
+  @override
   Future<void> initialize(LaunchConfiguration configuration) async {
     logger.info('初始化应用UI组件', tag: 'AppWidgetTask');
     
