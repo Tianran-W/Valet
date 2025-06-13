@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:valet/service/logger_service.dart';
+import 'package:valet/startup/entry_point.dart';
 import 'package:valet/startup/launch_configuration.dart';
 import 'package:valet/startup/startup.dart';
-import 'package:valet/workspace/presentation/home/home_page.dart';
 
 /// UI组件初始化任务
 /// 初始化应用的UI组件和主题
@@ -18,6 +18,8 @@ class AppWidgetTask extends LaunchTask {
     // 这里可以进行主题预加载、字体加载等UI相关的初始化
     // 例如：await precacheImage(AssetImage('assets/images/logo.png'), null);
 
+    final widget = getIt<EntryPoint>().create(configuration);
+
     runApp(MaterialApp(
         title: 'ERP System',
         debugShowCheckedModeBanner: false,
@@ -25,7 +27,7 @@ class AppWidgetTask extends LaunchTask {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
-        home: const HomePage(title: '科研设备管理'),
+        home: widget,
       )
     );
   }
