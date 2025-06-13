@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:valet/startup/launch_configuration.dart';
-import 'package:valet/workspace/presentation/home/home_page.dart';
+import 'package:valet/startup/authenticated_entry_point.dart';
 
 /// 应用程序入口点抽象类
 /// 定义了应用启动的标准接口
@@ -13,6 +13,6 @@ abstract class EntryPoint {
 class ValetApplication implements EntryPoint {
   @override
   Widget create(LaunchConfiguration config) {
-    return HomePage(title: '科研设备管理');
+    return AppRoot();
   }
 }

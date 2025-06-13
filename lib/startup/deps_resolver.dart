@@ -3,6 +3,7 @@ import 'package:valet/service/logger_service.dart';
 import 'package:valet/service/api/api_service.dart';
 import 'package:valet/workspace/application/approval_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
+import 'package:valet/user/application/auth_service.dart';
 
 /// 依赖解析器
 /// 负责注册和初始化应用所需的所有服务
@@ -39,6 +40,9 @@ class DepsResolver {
 
   /// 注册应用服务层
   static void registerApplicationServices(GetIt getIt) {
+    // 注册认证服务
+    getIt.registerLazySingleton<AuthService>(() => AuthService());
+
     // 注册审批服务
     getIt.registerFactory<ApprovalService>(
       () => ApprovalService(getIt<ApiService>()),

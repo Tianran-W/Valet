@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:valet/workspace/presentation/widgets/drawer_widgets.dart';
 import 'package:valet/workspace/presentation/pages/approval_page.dart';
 import 'package:valet/workspace/presentation/pages/dashboard_page.dart';
 import 'package:valet/workspace/presentation/pages/inventory_page.dart';
 import 'package:valet/workspace/presentation/pages/module_pages.dart';
+import 'package:valet/user/application/auth_service.dart';
+import 'package:valet/user/presentation/pages/login_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -16,6 +19,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  late final AuthService _authService;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = GetIt.instance<AuthService>();
+  }
 
   static final List<Widget> _pages = [
     const DashboardPage(),
@@ -42,6 +52,60 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /// 显示用户菜单
+  void _showUserMenu() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const CircleAvatar(
+                child: Icon(Icons.person),
+              ),
+              title: Text(_authService.currentUser?.username ?? '用户'),
+              subtitle: Text(_authService.currentUser?.email ?? ''),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('登出'),
+              onTap: () async {
+                Navigator.pop(context);
+                await _handleLogout();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 处理登出
+  Future<void> _handleLogout() async {
+    try {
+      await _authService.logout();
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const LoginPage(),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('登出失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,9 +129,7 @@ class _HomePageState extends State<HomePage> {
             icon: const CircleAvatar(
               radius: 14,
             ),
-            onPressed: () {
-              // 显示用户配置菜单
-            },
+            onPressed: _showUserMenu,
           ),
           const SizedBox(width: 10),
         ],
