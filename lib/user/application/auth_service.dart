@@ -108,7 +108,63 @@ class AuthService {
       return _isLoggedIn;
     } catch (e) {
       logger.error('检查认证状态时发生错误', tag: _tag, error: e, stackTrace: StackTrace.current);
-      throw Exception('检查认证状态失败: $e');
+      return false;
+    }
+  }
+
+  /// 用户注册
+  /// [username] 用户名
+  /// [password] 密码
+  /// [email] 邮箱
+  Future<bool> register(String username, String password, String email) async {
+    try {
+      logger.info('用户注册请求: $username', tag: _tag);
+      
+      // 调用注册API
+      final response = await _apiService.userApi.register(username, password, email);
+      
+      // 处理注册响应
+      if (response != null && response['success'] == true) {
+        logger.info('用户注册成功: $username', tag: _tag);
+        return true;
+      } else {
+        logger.warning('用户注册失败：服务器响应为空或注册失败', tag: _tag);
+        return false;
+      }
+    } catch (e) {
+      logger.error('用户注册失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('用户注册失败: $e');
+    }
+  }
+
+  /// 修改密码
+  /// [oldPassword] 原密码
+  /// [newPassword] 新密码
+  Future<bool> changePassword(String oldPassword, String newPassword) async {
+    try {
+      if (_currentUser == null) {
+        throw Exception('用户未登录');
+      }
+      
+      logger.info('用户修改密码请求: ${_currentUser!.username}', tag: _tag);
+      
+      // 调用修改密码API
+      final success = await _apiService.userApi.changePassword(
+        _currentUser!.id, 
+        oldPassword, 
+        newPassword
+      );
+      
+      if (success) {
+        logger.info('用户修改密码成功: ${_currentUser!.username}', tag: _tag);
+        return true;
+      } else {
+        logger.warning('用户修改密码失败', tag: _tag);
+        return false;
+      }
+    } catch (e) {
+      logger.error('修改密码失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('修改密码失败: $e');
     }
   }
 }

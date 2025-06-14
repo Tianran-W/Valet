@@ -62,4 +62,46 @@ class UserApi {
       throw Exception('更新用户信息失败: $e');
     }
   }
+
+  /// 用户注册
+  /// [username] 用户名
+  /// [password] 密码
+  /// [email] 邮箱
+  /// 返回注册结果，成功返回用户信息，失败返回null
+  Future<Map<String, dynamic>?> register(String username, String password, String email) async {
+    try {
+      final Map<String, dynamic> registerData = {
+        'username': username,
+        'password': password,
+        'email': email,
+      };
+      
+      final response = await _apiClient.post('/register', body: registerData);
+      return response;
+    } catch (e) {
+      logger.error('用户注册失败: $e');
+      throw Exception('用户注册失败: $e');
+    }
+  }
+
+  /// 修改密码
+  /// [userId] 用户ID
+  /// [oldPassword] 原密码
+  /// [newPassword] 新密码
+  /// 返回修改结果
+  Future<bool> changePassword(String userId, String oldPassword, String newPassword) async {
+    try {
+      final Map<String, dynamic> changePasswordData = {
+        'userId': userId,
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+      };
+      
+      await _apiClient.put('/user/$userId/password', body: changePasswordData);
+      return true;
+    } catch (e) {
+      logger.error('修改密码失败: $e');
+      throw Exception('修改密码失败: $e');
+    }
+  }
 }

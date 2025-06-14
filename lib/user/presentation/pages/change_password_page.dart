@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:valet/startup/startup.dart';
 import 'package:valet/user/application/auth_service.dart';
-import 'package:valet/user/presentation/pages/register_page.dart';
-import 'package:valet/workspace/presentation/home/home_page.dart';
 
-/// 登录页面
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+/// 修改密码页面
+class ChangePasswordPage extends StatefulWidget {
+  const ChangePasswordPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _oldPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   late AuthService _authService;
 
   bool _isLoading = false;
-  bool _isPasswordVisible = false;
+  bool _isOldPasswordVisible = false;
+  bool _isNewPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   @override
   void initState() {
@@ -32,13 +33,14 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
+    _oldPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  /// 处理登录逻辑
-  Future<void> _handleLogin() async {
+  /// 处理修改密码逻辑
+  Future<void> _handleChangePassword() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -48,24 +50,27 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final username = _usernameController.text.trim();
-      final password = _passwordController.text;
+      final oldPassword = _oldPasswordController.text;
+      final newPassword = _newPasswordController.text;
 
-      final success = await _authService.login(username, password);
+      final success = await _authService.changePassword(oldPassword, newPassword);
 
       if (success && mounted) {
-        // 登录成功，导航到主页
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const HomePage(title: '科研设备管理'),
+        // 修改密码成功
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('密码修改成功！'),
+            backgroundColor: Colors.green,
           ),
         );
+        
+        Navigator.of(context).pop();
       } else {
-        // 登录失败，显示错误消息
+        // 修改密码失败
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('用户名或密码错误'),
+              content: Text('密码修改失败，请检查原密码是否正确'),
               backgroundColor: Colors.red,
             ),
           );
@@ -75,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('登录失败: $e'),
+            content: Text('密码修改失败: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -125,14 +130,14 @@ class _LoginPageState extends State<LoginPage> {
                           radius: 50,
                           backgroundColor: Colors.grey,
                           child: Icon(
-                            Icons.person,
+                            Icons.lock_reset,
                             size: 50,
                             color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          '科研设备管理系统',
+                          '修改密码',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
@@ -140,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '请登录您的账户',
+                          '请输入原密码和新密码',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Colors.grey[600],
                           ),
@@ -148,60 +153,114 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 32),
 
-                        // 用户名输入框
+                        // 原密码输入框
                         TextFormField(
-                          controller: _usernameController,
-                          decoration: const InputDecoration(
-                            labelText: '用户名',
-                            hintText: '请输入用户名',
-                            prefixIcon: Icon(Icons.person_outline),
-                            border: OutlineInputBorder(),
+                          controller: _oldPasswordController,
+                          decoration: InputDecoration(
+                            labelText: '原密码',
+                            hintText: '请输入当前密码',
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isOldPasswordVisible 
+                                  ? Icons.visibility 
+                                  : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isOldPasswordVisible = !_isOldPasswordVisible;
+                                });
+                              },
+                            ),
+                            border: const OutlineInputBorder(),
                           ),
+                          obscureText: !_isOldPasswordVisible,
                           enabled: !_isLoading,
                           validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return '请输入用户名';
+                            if (value == null || value.isEmpty) {
+                              return '请输入原密码';
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 16),
 
-                        // 密码输入框
+                        // 新密码输入框
                         TextFormField(
-                          controller: _passwordController,
+                          controller: _newPasswordController,
                           decoration: InputDecoration(
-                            labelText: '密码',
-                            hintText: '请输入密码',
-                            prefixIcon: const Icon(Icons.lock_outline),
+                            labelText: '新密码',
+                            hintText: '请输入新密码',
+                            prefixIcon: const Icon(Icons.lock),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _isPasswordVisible 
+                                _isNewPasswordVisible 
                                   ? Icons.visibility 
                                   : Icons.visibility_off,
                               ),
                               onPressed: () {
                                 setState(() {
-                                  _isPasswordVisible = !_isPasswordVisible;
+                                  _isNewPasswordVisible = !_isNewPasswordVisible;
                                 });
                               },
                             ),
                             border: const OutlineInputBorder(),
                           ),
-                          obscureText: !_isPasswordVisible,
+                          obscureText: !_isNewPasswordVisible,
                           enabled: !_isLoading,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return '请输入密码';
+                              return '请输入新密码';
+                            }
+                            if (value.length < 6) {
+                              return '新密码至少需要6位字符';
+                            }
+                            if (value == _oldPasswordController.text) {
+                              return '新密码不能与原密码相同';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        // 确认新密码输入框
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          decoration: InputDecoration(
+                            labelText: '确认新密码',
+                            hintText: '请再次输入新密码',
+                            prefixIcon: const Icon(Icons.lock),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isConfirmPasswordVisible 
+                                  ? Icons.visibility 
+                                  : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                                });
+                              },
+                            ),
+                            border: const OutlineInputBorder(),
+                          ),
+                          obscureText: !_isConfirmPasswordVisible,
+                          enabled: !_isLoading,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return '请确认新密码';
+                            }
+                            if (value != _newPasswordController.text) {
+                              return '两次输入的新密码不一致';
                             }
                             return null;
                           },
                         ),
                         const SizedBox(height: 24),
 
-                        // 登录按钮
+                        // 修改密码按钮
                         FilledButton(
-                          onPressed: _isLoading ? null : _handleLogin,
+                          onPressed: _isLoading ? null : _handleChangePassword,
                           style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -218,21 +277,17 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               )
                             : const Text(
-                                '登录',
+                                '修改密码',
                                 style: TextStyle(fontSize: 16),
                               ),
                         ),
 
-                        // 注册链接
+                        // 取消按钮
                         TextButton(
                           onPressed: _isLoading ? null : () {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => const RegisterPage(),
-                              ),
-                            );
+                            Navigator.of(context).pop();
                           },
-                          child: const Text('没有账户？立即注册'),
+                          child: const Text('取消'),
                         ),
                       ],
                     ),
