@@ -3,7 +3,6 @@ import 'package:valet/startup/startup.dart';
 import 'package:valet/workspace/application/approval_service.dart';
 import 'package:valet/workspace/models/approval_model.dart';
 import 'package:valet/workspace/presentation/widgets/approval/approval_widgets.dart';
-import 'package:valet/workspace/presentation/widgets/stat_card.dart';
 
 /// 请求审批页面
 class ApprovalPage extends StatefulWidget {
@@ -13,18 +12,12 @@ class ApprovalPage extends StatefulWidget {
   State<ApprovalPage> createState() => _ApprovalPageState();
 }
 
-class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderStateMixin {
-  // 标签控制器
-  late TabController _tabController;
-  // TODO: 去掉这个标签
-  final List<String> _tabs = ['待我审批', '我发起的'];
-  
+class _ApprovalPageState extends State<ApprovalPage> {
   // 服务实例
   late ApprovalService _approvalService;
   
   // 审批数据
   List<Approval> _approvals = [];
-  List<Approval> _myApplications = [];
   
   // 状态管理
   bool _isLoading = false;
@@ -37,19 +30,12 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this);
     
     // 初始化服务
     _approvalService = getIt<ApprovalService>();
     
     // 加载真实数据
     _loadApprovalData();
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
   
   // 从API加载审批数据
@@ -68,7 +54,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
       
       setState(() {
         _approvals = pendingApprovals;
-        _myApplications = [];
         _isLoading = false;
       });
     } catch (e) {
@@ -170,17 +155,7 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
             
             const SizedBox(height: 24),
             
-            // 标签页切换
-            TabBar(
-              controller: _tabController,
-              tabs: _tabs.map((tab) => Tab(text: tab)).toList(),
-              labelColor: Theme.of(context).colorScheme.primary,
-              indicatorColor: Theme.of(context).colorScheme.primary,
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // 标签页内容
+            // 审批列表
             Expanded(
               child: _isLoading
                 ? const Center(
@@ -193,13 +168,7 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
                       ],
                     ),
                   )
-                : TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildPendingApprovals(),
-                      _buildMyApplications(),
-                    ],
-                  ),
+                : _buildPendingApprovals(),
             ),
           ],
         ),
@@ -209,22 +178,50 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
 
   // 统计卡片
   Widget _buildStatCards() {
-    return Row(
-      children: [
-        StatCardWidget(
-          title: '待审批',
-          value: _approvals.length.toString(),
-          icon: Icons.pending_actions,
-          color: Colors.blue,
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 200),
+      child: Card(
+        elevation: 1,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.blue.withAlpha(51),
+                radius: 16,
+                child: Icon(
+                  Icons.pending_actions, 
+                  color: Colors.blue,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '待审批',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _approvals.length.toString(),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        const SizedBox(width: 16),
-        StatCardWidget(
-          title: '我发起的',
-          value: _myApplications.length.toString(),
-          icon: Icons.send,
-          color: Colors.purple,
-        ),
-      ],
+      ),
     );
   }
 
@@ -243,26 +240,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
                   approval: approval,
                   onApproveReject: _showApprovalDialog,
                   onTap: _showApprovalDetailDialog,
-                );
-              },
-            ),
-          );
-  }
-
-  // 我发起的申请列表
-  Widget _buildMyApplications() {
-    return _myApplications.isEmpty
-        ? const Center(child: Text('暂无发起的申请'))
-        : Card(
-            elevation: 1,
-            child: ListView.separated(
-              itemCount: _myApplications.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final approval = _myApplications[index];
-                return MyApplicationTile(
-                  application: approval,
-                  onTap: _showMyApplicationDetailDialog,
                 );
               },
             ),
@@ -320,17 +297,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
       builder: (context) => ApprovalDetailDialog(
         approval: approval,
         title: '审批详情',
-      ),
-    );
-  }
-
-  // 显示我的申请详情对话框
-  void _showMyApplicationDetailDialog(Approval application) {
-    showDialog(
-      context: context,
-      builder: (context) => ApprovalDetailDialog(
-        approval: application,
-        title: '申请详情',
       ),
     );
   }
