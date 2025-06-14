@@ -103,8 +103,8 @@ class WorkspaceApi {
   }) async {
     logger.info('归还物品: materialId=$materialId, userId=$userId');
     final Map<String, dynamic> body = {
-      'material_id': materialId,
-      'user_id': userId,
+      'materialId': materialId,
+      'userId': userId,
     };
     
     await _apiClient.post('/return', body: body);
@@ -141,7 +141,7 @@ class WorkspaceApi {
   /// [materialId]: 物资ID
   /// [approvalReason]: 审批原因
   Future<bool> processApproval({
-    required String approvalId,
+    required int approvalId,
     required bool isApprove,
     required int userId,
     required int materialId,
@@ -149,11 +149,11 @@ class WorkspaceApi {
   }) async {
     try {
       final Map<String, dynamic> body = {
-        'approval_id': approvalId,
-        'user_id': userId,
-        'material_id': materialId,
-        'approval_result': isApprove,
-        'approval_reason': approvalReason,
+        'approvalId': approvalId, 
+        'userId': userId,
+        'materialId': materialId,
+        'approvalResult': isApprove,
+        'approvalReason': approvalReason,
       };
       await _apiClient.post('/admin/ApprovalResult', body: body);
       return true;

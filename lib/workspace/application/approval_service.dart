@@ -34,7 +34,7 @@ class ApprovalService {
   /// [materialId]: 物资ID
   /// [approvalReason]: 审批原因
   Future<bool> processApproval({
-    required String approvalId,
+    required int approvalId,
     required bool isApprove,
     required int userId,
     required int materialId,

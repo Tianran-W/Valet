@@ -10,7 +10,7 @@ enum ApprovalStatus {
 
 /// 审批单数据模型
 class Approval {
-  final String id;
+  final int id;
   final String materialId;
   final String materialName;
   final String applicantId;
@@ -37,7 +37,7 @@ class Approval {
   // 从Map构建对象
   factory Approval.fromMap(Map<String, dynamic> map) {
     return Approval(
-      id: map['approvalId']?.toString() ?? '',
+      id: map['approvalId'] != null ? int.parse(map['approvalId'].toString()) : 0,
       materialId: map['materialId']?.toString() ?? '',
       materialName: map['materialName']?.toString() ?? '',
       applicantId: map['userId']?.toString() ?? map['applicantId']?.toString() ?? '',
