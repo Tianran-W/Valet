@@ -9,16 +9,12 @@ class AuthService {
   
   User? _currentUser;
   bool _isLoggedIn = false;
-  String? _authToken;
 
   /// 获取当前登录用户
   User? get currentUser => _currentUser;
 
   /// 获取登录状态
   bool get isLoggedIn => _isLoggedIn;
-
-  /// 获取认证token
-  String? get authToken => _authToken;
 
   /// 构造函数
   AuthService(this._apiService);
@@ -34,9 +30,8 @@ class AuthService {
       final response = await _apiService.userApi.login(username, password);
       
       // 处理登录响应
-      if (response != null) {
-        // 从响应中提取用户信息和token
-        // 这里需要根据实际API响应格式调整
+      if (response != null && response['success'] == true) {
+        // 从响应中提取用户信息
         _currentUser = User(
           id: response['userId']?.toString() ?? '1',
           username: username,
@@ -44,18 +39,11 @@ class AuthService {
           avatarUrl: response['avatarUrl']?.toString(),
         );
         
-        // 保存认证token（如果API返回）
-        _authToken = response['token']?.toString();
-        if (_authToken != null) {
-          // 更新API服务的认证头
-          _apiService.updateAuthToken(_authToken!);
-        }
-        
         _isLoggedIn = true;
         logger.info('用户登录成功: $username', tag: _tag);
         return true;
       } else {
-        logger.warning('用户登录失败：服务器响应为空', tag: _tag);
+        logger.warning('用户登录失败：服务器响应为空或登录失败', tag: _tag);
         return false;
       }
     } catch (e) {
@@ -69,23 +57,20 @@ class AuthService {
     try {
       logger.info('用户登出: ${_currentUser?.username}', tag: _tag);
       
-      // 如果有认证token，可以调用logout API
-      if (_authToken != null) {
-        try {
-          await _apiService.userApi.logout();
-          logger.debug('成功调用logout API', tag: _tag);
-        } catch (e) {
-          logger.warning('调用logout API失败: $e', tag: _tag);
-        }
+      // 调用logout API来清除服务器端的session
+      try {
+        await _apiService.userApi.logout();
+        logger.debug('成功调用logout API', tag: _tag);
+      } catch (e) {
+        logger.warning('调用logout API失败: $e', tag: _tag);
       }
       
       // 清除本地状态
       _currentUser = null;
       _isLoggedIn = false;
-      _authToken = null;
       
-      // 清除API服务的认证头
-      _apiService.clearAuthToken();
+      // 清除客户端的Session数据（Cookies）
+      _apiService.clearSession();
       
       logger.info('用户登出成功', tag: _tag);
     } catch (e) {
@@ -99,22 +84,22 @@ class AuthService {
     try {
       logger.debug('检查用户认证状态开始', tag: _tag);
       
-      // 如果有本地token，尝试验证
-      if (_authToken != null && _currentUser != null) {
+      // 如果有本地用户信息，尝试验证Session状态
+      if (_currentUser != null) {
         try {
-          // 调用API验证token有效性
+          // 调用API验证Session有效性
           final response = await _apiService.userApi.checkAuthStatus();
-          if (response != null) {
-            logger.debug('Token验证成功', tag: _tag);
+          if (response != null && response['isAuthenticated'] == true) {
+            logger.debug('Session验证成功', tag: _tag);
+            _isLoggedIn = true;
             return true;
           }
         } catch (e) {
-          logger.warning('Token验证失败: $e', tag: _tag);
+          logger.warning('Session验证失败: $e', tag: _tag);
           // 清除无效的认证状态
           _currentUser = null;
           _isLoggedIn = false;
-          _authToken = null;
-          _apiService.clearAuthToken();
+          _apiService.clearSession();
         }
       }
       

@@ -12,7 +12,8 @@ class UserApi {
   /// 用户登录
   /// [username] 用户名
   /// [password] 密码
-  /// 返回包含用户信息和token的Map，如果登录失败返回null
+  /// 返回包含用户信息的Map，如果登录失败返回null
+  /// Session认证会在Cookie中自动设置session信息
   Future<Map<String, dynamic>?> login(String username, String password) async {
     final Map<String, dynamic> loginData = {
       'username': username,
@@ -29,7 +30,7 @@ class UserApi {
   }
 
   /// 检查认证状态
-  /// 返回认证检查的响应，如果失败返回null
+  /// 返回认证检查的响应，Session认证通过Cookie验证
   Future<Map<String, dynamic>?> checkAuthStatus() async {
     final response = await _apiClient.get('/auth/check');
     return response;

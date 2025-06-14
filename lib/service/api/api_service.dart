@@ -16,12 +16,10 @@ class ApiService {
   ApiService._({
     required String baseUrl,
     Map<String, String>? headers,
-    String? authToken,
   }) {
     final defaultHeaders = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      if (authToken != null) 'Authorization': 'Bearer $authToken',
       ...?headers,
     };
 
@@ -32,22 +30,15 @@ class ApiService {
   static ApiService create({
     required String baseUrl,
     Map<String, String>? headers,
-    String? authToken,
   }) {
     return ApiService._(
       baseUrl: baseUrl,
       headers: headers,
-      authToken: authToken,
     );
   }
 
-  /// 更新认证令牌
-  void updateAuthToken(String token) {
-    _apiClient.defaultHeaders['Authorization'] = 'Bearer $token';
-  }
-
-  /// 清除认证令牌
-  void clearAuthToken() {
-    _apiClient.defaultHeaders.remove('Authorization');
+  /// 清除Session（登出时调用）
+  void clearSession() {
+    _apiClient.clearCookies();
   }
 }

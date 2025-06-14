@@ -32,7 +32,6 @@ class DepsResolver {
       () => ApiService.create(
         baseUrl: dotenv.env['BACKEND_URL'] ?? '',
         headers: {},
-        authToken: '',
       ),
     );
   }

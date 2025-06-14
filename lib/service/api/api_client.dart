@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 
 /// API 客户端类，用于处理与服务器的通信
 class ApiClient {
@@ -10,6 +12,9 @@ class ApiClient {
   
   /// Dio 实例
   late final Dio _dio;
+  
+  /// Cookie管理器
+  late final CookieJar _cookieJar;
 
   /// 构造函数
   ApiClient({
@@ -19,12 +24,18 @@ class ApiClient {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     } {
+    // 初始化Cookie管理器
+    _cookieJar = CookieJar();
+    
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
       headers: this.defaultHeaders,
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
     ));
+    
+    // 添加Cookie管理器拦截器
+    _dio.interceptors.add(CookieManager(_cookieJar));
   }
 
   /// 更新默认请求头
@@ -33,10 +44,14 @@ class ApiClient {
     _dio.options.headers.addAll(headers);
   }
 
-  /// 移除请求头
-  void removeHeader(String key) {
-    defaultHeaders.remove(key);
-    _dio.options.headers.remove(key);
+  /// 清除所有Cookies（用于登出）
+  void clearCookies() {
+    _cookieJar.deleteAll();
+  }
+  
+  /// 获取Cookie信息（用于调试）
+  Future<List<Cookie>> getCookies(String url) async {
+    return await _cookieJar.loadForRequest(Uri.parse(url));
   }
 
   /// 执行 GET 请求
