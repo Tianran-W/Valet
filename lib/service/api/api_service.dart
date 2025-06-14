@@ -1,5 +1,6 @@
 import 'api_client.dart';
 import 'workspace_api.dart';
+import 'user_api.dart';
 
 /// API 服务类，整合所有 API 服务
 class ApiService {
@@ -7,6 +8,9 @@ class ApiService {
 
   /// 获取工作空间 API 实例
   WorkspaceApi get workspaceApi => WorkspaceApi(_apiClient);
+
+  /// 获取用户 API 实例
+  UserApi get userApi => UserApi(_apiClient);
 
   /// 私有构造函数
   ApiService._({

@@ -14,17 +14,29 @@ class ApiClient {
   /// 构造函数
   ApiClient({
     required this.baseUrl,
-    this.defaultHeaders = const {
+    Map<String, String>? defaultHeaders,
+  }) : defaultHeaders = defaultHeaders ?? {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-    },
-  }) {
+    } {
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
-      headers: defaultHeaders,
+      headers: this.defaultHeaders,
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
     ));
+  }
+
+  /// 更新默认请求头
+  void updateDefaultHeaders(Map<String, String> headers) {
+    defaultHeaders.addAll(headers);
+    _dio.options.headers.addAll(headers);
+  }
+
+  /// 移除请求头
+  void removeHeader(String key) {
+    defaultHeaders.remove(key);
+    _dio.options.headers.remove(key);
   }
 
   /// 执行 GET 请求

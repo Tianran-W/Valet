@@ -71,19 +71,6 @@ Future<void> initGetIt(
 
   await dotenv.load(fileName: ".env/dev.env");
 
-  // 注册API基础URL
-  getIt.registerSingleton<String>(
-    dotenv.env['BACKEND_URL'] ?? '',
-    instanceName: 'baseUrl',
-  );
-  
-  // 注册认证令牌（异步）
-  // TODO: 从安全存储或用户登录状态获取
-  getIt.registerSingletonAsync<String>(
-    () async => '',
-    instanceName: 'authToken',
-  );
-
   await DepsResolver.resolve(getIt);
 }
 

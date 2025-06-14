@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:valet/startup/startup.dart';
 import 'package:valet/user/application/auth_service.dart';
 import 'package:valet/workspace/presentation/home/home_page.dart';
 
@@ -14,10 +15,19 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
-  
+
+  late AuthService _authService;
+
   bool _isLoading = false;
   bool _isPasswordVisible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // 初始化服务
+    _authService = getIt<AuthService>();
+  }
 
   @override
   void dispose() {
@@ -78,55 +88,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  /// 显示演示账号信息
-  void _showDemoAccounts() {
-    final accounts = _authService.getValidDemoAccounts();
-    
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('演示账号'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '您可以使用以下任一账号登录：',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            ...accounts.map(
-              (account) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        '${account['role']}:',
-                        style: const TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: Text('${account['username']} / ${account['password']}'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('关闭'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              Theme.of(context).colorScheme.primary.withAlpha(204),
               Theme.of(context).colorScheme.primary,
             ],
           ),
@@ -259,13 +220,6 @@ class _LoginPageState extends State<LoginPage> {
                                 '登录',
                                 style: TextStyle(fontSize: 16),
                               ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // 演示账号按钮
-                        OutlinedButton(
-                          onPressed: _isLoading ? null : _showDemoAccounts,
-                          child: const Text('查看演示账号'),
                         ),
                       ],
                     ),

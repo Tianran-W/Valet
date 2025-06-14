@@ -1,5 +1,4 @@
 import 'package:valet/service/logger_service.dart';
-
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/models/approval_model.dart';
 import 'api_client.dart';

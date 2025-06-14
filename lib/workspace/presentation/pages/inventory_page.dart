@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:valet/service/api/api_service.dart';
-import 'package:valet/service/logger_service.dart';
+import 'package:valet/startup/startup.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/presentation/widgets/inventory/inventory_widgets.dart';
@@ -323,16 +321,11 @@ class _InventoryPageState extends State<InventoryPage> {
   void initState() {
     super.initState();
     // 初始化API服务
-    final backendUrl = dotenv.env['BACKEND_URL'] ?? "";
-    logger.info('初始化库存服务 $backendUrl', tag: 'InventoryPage');
-    final apiService = ApiService.create(baseUrl: backendUrl);
-    _inventoryService = InventoryService(apiService);
-    
+    _inventoryService = getIt<InventoryService>();
+
     // 加载数据
     _loadInventoryItems();
   }
-  
-
   
   // 从API加载物品数据
   Future<void> _loadInventoryItems() async {

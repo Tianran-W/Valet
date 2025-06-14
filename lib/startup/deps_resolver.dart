@@ -1,9 +1,10 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:valet/service/logger_service.dart';
 import 'package:valet/service/api/api_service.dart';
+import 'package:valet/user/user.dart';
 import 'package:valet/workspace/application/approval_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
-import 'package:valet/user/application/auth_service.dart';
 
 /// 依赖解析器
 /// 负责注册和初始化应用所需的所有服务
@@ -14,8 +15,8 @@ class DepsResolver {
 
     try {
       await registerApiService(getIt);
-
-      registerApplicationServices(getIt);
+      await registerAuthService(getIt);
+      await registerApplicationServices(getIt);
 
       logger.info('依赖注入容器初始化成功', tag: 'DepsResolver');
     } catch (e, s) {
@@ -27,32 +28,29 @@ class DepsResolver {
   /// 注册API服务
   static Future<void> registerApiService(GetIt getIt) async {
     // 注册ApiService为单例
-    final baseUrl = getIt.get<String>(instanceName: 'baseUrl');
-    final authToken = await getIt.getAsync<String>(instanceName: 'authToken');
     getIt.registerLazySingleton<ApiService>(
       () => ApiService.create(
-        baseUrl: baseUrl,
+        baseUrl: dotenv.env['BACKEND_URL'] ?? '',
         headers: {},
-        authToken: authToken,
+        authToken: '',
       ),
     );
   }
 
-  /// 注册应用服务层
-  static void registerApplicationServices(GetIt getIt) {
-    // 注册认证服务
-    getIt.registerLazySingleton<AuthService>(() => AuthService());
-
-    // 注册审批服务
-    getIt.registerFactory<ApprovalService>(
-      () => ApprovalService(getIt<ApiService>()),
+  /// 注册用户认证服务
+  static Future<void> registerAuthService(GetIt getIt) async {
+    getIt.registerLazySingleton<AuthService>(
+      () => AuthService(getIt<ApiService>()),
     );
+  }
 
-    // 注册库存服务
-    getIt.registerFactory<InventoryService>(
+  /// 注册应用层服务
+  static Future<void> registerApplicationServices(GetIt getIt) async {
+    getIt.registerLazySingleton<InventoryService>(
       () => InventoryService(getIt<ApiService>()),
     );
-
-    // 可以继续注册其他服务...
+    getIt.registerLazySingleton<ApprovalService>(
+      () => ApprovalService(getIt<ApiService>()),
+    );
   }
 }

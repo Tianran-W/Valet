@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:valet/service/api/api_service.dart';
+import 'package:valet/startup/startup.dart';
 import 'package:valet/workspace/application/approval_service.dart';
 import 'package:valet/workspace/models/approval_model.dart';
 import 'package:valet/workspace/presentation/widgets/approval/approval_widgets.dart';
@@ -17,6 +16,7 @@ class ApprovalPage extends StatefulWidget {
 class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderStateMixin {
   // 标签控制器
   late TabController _tabController;
+  // TODO: 去掉这个标签
   final List<String> _tabs = ['待我审批', '我发起的'];
   
   // 服务实例
@@ -40,7 +40,7 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
     _tabController = TabController(length: _tabs.length, vsync: this);
     
     // 初始化服务
-    _initializeService();
+    _approvalService = getIt<ApprovalService>();
     
     // 加载真实数据
     _loadApprovalData();
@@ -50,23 +50,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-  
-  // 初始化服务
-  void _initializeService() {
-    try {
-      // 从环境变量读取后端URL
-      final backendUrl = dotenv.env['BACKEND_URL'] ?? '';
-      
-      // 创建API服务实例
-      final apiService = ApiService.create(baseUrl: backendUrl);
-      _approvalService = ApprovalService(apiService);
-    } catch (e) {
-      setState(() {
-        _hasError = true;
-        _errorMessage = "初始化服务失败: $e";
-      });
-    }
   }
   
   // 从API加载审批数据
@@ -83,12 +66,9 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
       // 加载待审批列表
       final pendingApprovals = await _approvalService.getPendingApprovals(_currentUserId);
       
-      // 使用示例数据作为我发起的申请
-      final sampleApplications = _generateSampleApplications();
-      
       setState(() {
         _approvals = pendingApprovals;
-        _myApplications = sampleApplications;
+        _myApplications = [];
         _isLoading = false;
       });
     } catch (e) {
@@ -113,44 +93,6 @@ class _ApprovalPageState extends State<ApprovalPage> with SingleTickerProviderSt
         );
       }
     }
-  }
-
-  // 生成示例申请数据
-  List<Approval> _generateSampleApplications() {
-    return [
-      Approval(
-        id: '1001',
-        materialId: 'M001',
-        materialName: '办公椅',
-        applicantId: '1',
-        applicantName: '张三',
-        reason: '由于项目紧急，需要申请今晚加班到22:00完成开发任务',
-        status: ApprovalStatus.pending,
-        currentApprover: '李四',
-      ),
-      Approval(
-        id: '1002',
-        materialId: 'M002', 
-        materialName: '年假',
-        applicantId: '1',
-        applicantName: '张三',
-        reason: '申请12月20日-12月25日年假，共5天',
-        status: ApprovalStatus.approved,
-        approveTime: DateTime.now().subtract(const Duration(hours: 12)).toString(),
-        currentApprover: '王五',
-      ),
-      Approval(
-        id: '1003',
-        materialId: 'M003',
-        materialName: '办公用品',
-        applicantId: '1', 
-        applicantName: '张三',
-        reason: '申请采购开发团队办公椅10张，预算8000元',
-        status: ApprovalStatus.rejected,
-        rejectReason: '预算超支，请重新评估需求',
-        currentApprover: '赵六',
-      ),
-    ];
   }
 
   @override
