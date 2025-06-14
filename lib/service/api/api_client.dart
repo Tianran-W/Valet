@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:valet/service/logger_service.dart';
 
 /// API 客户端类，用于处理与服务器的通信
 class ApiClient {
@@ -21,7 +22,7 @@ class ApiClient {
     required this.baseUrl,
     Map<String, String>? defaultHeaders,
   }) : defaultHeaders = defaultHeaders ?? {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       'Accept': 'application/json',
     } {
     // 初始化Cookie管理器
@@ -32,10 +33,51 @@ class ApiClient {
       headers: this.defaultHeaders,
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
+      contentType: 'application/json; charset=utf-8',
+      responseType: ResponseType.json,
     ));
     
     // 添加Cookie管理器拦截器
     _dio.interceptors.add(CookieManager(_cookieJar));
+    
+    // 添加请求拦截器来确保编码正确
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        // 确保请求头包含正确的编码信息
+        options.headers['Content-Type'] = 'application/json; charset=utf-8';
+        options.headers['Accept'] = 'application/json';
+        
+        // 如果是POST/PUT请求且body是Map，确保Dio使用UTF-8编码
+        if ((options.method == 'POST' || options.method == 'PUT') && 
+            options.data is Map<String, dynamic>) {
+          options.contentType = 'application/json; charset=utf-8';
+        }
+        
+        // 记录请求信息
+        logger.trace('API请求: ${options.method} ${options.uri}', tag: 'ApiClient');
+        logger.trace('请求头: ${options.headers}', tag: 'ApiClient');
+        if (options.data != null) {
+          logger.trace('请求体: ${options.data}', tag: 'ApiClient');
+        }
+        
+        handler.next(options);
+      },
+      onResponse: (response, handler) {
+        logger.debug('API响应: ${response.statusCode} ${response.statusMessage}', tag: 'ApiClient');
+        logger.debug('响应头: ${response.headers}', tag: 'ApiClient');
+        if (response.data != null) {
+          logger.debug('响应体: ${response.data}', tag: 'ApiClient');
+        }
+        handler.next(response);
+      },
+      onError: (error, handler) {
+        logger.error('API错误: ${error.message}', tag: 'ApiClient');
+        if (error.response != null) {
+          logger.error('错误响应: ${error.response?.statusCode} ${error.response?.data}', tag: 'ApiClient');
+        }
+        handler.next(error);
+      },
+    ));
   }
 
   /// 更新默认请求头

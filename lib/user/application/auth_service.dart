@@ -30,11 +30,14 @@ class AuthService {
       final response = await _apiService.userApi.login(username, password);
       
       // 处理登录响应
-      if (response != null && response['success'] == true) {
+      if (response != null && 
+          (response['success'] == true || 
+           response['message'] == '登录成功' || 
+           response['userId'] != null)) {
         // 从响应中提取用户信息
         _currentUser = User(
           id: response['userId']?.toString() ?? '1',
-          username: username,
+          username: response['username']?.toString() ?? username,
           email: response['email']?.toString() ?? '$username@example.com',
           avatarUrl: response['avatarUrl']?.toString(),
         );
@@ -44,6 +47,7 @@ class AuthService {
         return true;
       } else {
         logger.warning('用户登录失败：服务器响应为空或登录失败', tag: _tag);
+        logger.info('响应详情: $response', tag: _tag);
         return false;
       }
     } catch (e) {

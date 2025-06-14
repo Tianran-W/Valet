@@ -18,7 +18,7 @@ class ApiService {
     Map<String, String>? headers,
   }) {
     final defaultHeaders = {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       'Accept': 'application/json',
       ...?headers,
     };

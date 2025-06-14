@@ -27,10 +27,18 @@ class DepsResolver {
 
   /// 注册API服务
   static Future<void> registerApiService(GetIt getIt) async {
+    final backendUrl = dotenv.env['BACKEND_URL'] ?? '';
+    if (backendUrl.isEmpty) {
+      logger.error('BACKEND_URL 环境变量未配置', tag: 'DepsResolver');
+      throw Exception('BACKEND_URL 环境变量未配置');
+    }
+    
+    logger.info('API服务配置: baseUrl=$backendUrl', tag: 'DepsResolver');
+    
     // 注册ApiService为单例
     getIt.registerLazySingleton<ApiService>(
       () => ApiService.create(
-        baseUrl: dotenv.env['BACKEND_URL'] ?? '',
+        baseUrl: backendUrl,
         headers: {},
       ),
     );

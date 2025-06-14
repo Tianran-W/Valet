@@ -64,6 +64,12 @@ class LoggerService {
     _logger.e(taggedMessage, error: error, stackTrace: stackTrace);
   }
 
+  /// 记录跟踪级别日志
+  void trace(String message, {String? tag, Object? error, StackTrace? stackTrace}) {
+    final taggedMessage = tag != null ? '[$tag] $message' : message;
+    _logger.t(taggedMessage, error: error, stackTrace: stackTrace);
+  }
+
   /// 记录致命错误级别日志
   void fatal(String message, {String? tag, Object? error, StackTrace? stackTrace}) {
     final taggedMessage = tag != null ? '[$tag] $message' : message;

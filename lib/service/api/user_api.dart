@@ -15,13 +15,35 @@ class UserApi {
   /// 返回包含用户信息的Map，如果登录失败返回null
   /// Session认证会在Cookie中自动设置session信息
   Future<Map<String, dynamic>?> login(String username, String password) async {
-    final Map<String, dynamic> loginData = {
-      'username': username,
-      'password': password,
-    };
-    
-    final response = await _apiClient.post('/login', body: loginData);
-    return response;
+    try {
+      logger.info('开始登录请求: username=$username', tag: 'UserApi');
+      
+      final Map<String, dynamic> loginData = {
+        'username': username,
+        'password': password,
+      };
+      
+      logger.info('登录数据: $loginData', tag: 'UserApi');
+      
+      final response = await _apiClient.post('/login', body: loginData);
+      
+      logger.info('登录响应: $response', tag: 'UserApi');
+      
+      // 验证响应格式，确保与Python代码期望的格式一致
+      if (response is Map<String, dynamic>) {
+        return response;
+      } else if (response != null) {
+        // 如果响应不是Map类型，尝试转换
+        logger.warning('登录响应格式异常，尝试转换: ${response.runtimeType}', tag: 'UserApi');
+        return {'data': response};
+      } else {
+        logger.warning('登录响应为空', tag: 'UserApi');
+        return null;
+      }
+    } catch (e) {
+      logger.error('登录请求失败: $e', tag: 'UserApi');
+      rethrow;
+    }
   }
 
   /// 用户登出
