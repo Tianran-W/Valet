@@ -1,8 +1,64 @@
 import 'package:flutter/material.dart';
-import 'package:valet/workspace/presentation/widgets/dashboard_widgets.dart';
+import 'package:valet/startup/startup.dart';
+import 'package:valet/workspace/application/inventory_service.dart';
+import 'package:valet/workspace/models/inventory_model.dart';
+import 'package:valet/workspace/presentation/widgets/dashboard/return_reminder.dart';
+import 'package:valet/workspace/presentation/widgets/dashboard/inventory_alert.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  late InventoryService _inventoryService;
+  
+  // 数据状态
+  List<MaterialAlert> _inventoryWarnings = [];
+  List<ReturnReminder> _returnReminders = [];
+  bool _isLoading = false;
+  bool _hasError = false;
+  String _errorMessage = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _inventoryService = getIt<InventoryService>();
+    _loadDashboardData();
+  }
+
+  /// 加载仪表盘数据
+  Future<void> _loadDashboardData() async {
+    if (_isLoading) return;
+    
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+      _errorMessage = "";
+    });
+
+    try {
+      // 并行加载库存预警和归还提醒
+      final results = await Future.wait([
+        _inventoryService.getInventoryWarnings(),
+        _inventoryService.getReturnReminders(),
+      ]);
+
+      setState(() {
+        _inventoryWarnings = results[0] as List<MaterialAlert>;
+        _returnReminders = results[1] as List<ReturnReminder>;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+        _errorMessage = e.toString();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,125 +67,89 @@ class DashboardPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '欢迎回来，管理员',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 5),
-          Text(
-            '今天是 ${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
-            style: Theme.of(context).textTheme.bodyLarge,
+          // 欢迎信息
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '欢迎回来，管理员',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      '今天是 ${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: _isLoading 
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh),
+                tooltip: '刷新数据',
+                onPressed: _isLoading ? null : _loadDashboardData,
+              ),
+            ],
           ),
           const SizedBox(height: 20),
           
-          // 快速统计卡片
-          const Row(
-            children: [
-              Expanded(
-                child: DashboardCard(
-                  title: '设备总数量',
-                  value: '1,358',
-                  icon: Icons.science,
-                  color: Colors.blue,
-                  change: '+3.2%',
-                ),
+          // 错误信息显示
+          if (_hasError)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                border: Border.all(color: Colors.red.shade200),
+                borderRadius: BorderRadius.circular(8),
               ),
-              SizedBox(width: 16),
-              Expanded(
-                child: DashboardCard(
-                  title: '本月借用次数',
-                  value: '245',
-                  icon: Icons.swap_horiz,
-                  color: Colors.orange,
-                  change: '+8.5%',
-                ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red.shade700),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '加载数据失败: $_errorMessage',
+                      style: TextStyle(color: Colors.red.shade700),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _loadDashboardData,
+                    child: const Text('重试'),
+                  ),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Row(
-            children: [
-              Expanded(
-                child: DashboardCard(
-                  title: '维修中设备',
-                  value: '32',
-                  icon: Icons.build,
-                  color: Colors.red,
-                  change: '-4.1%',
-                ),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: DashboardCard(
-                  title: '设备利用率',
-                  value: '78.6%',
-                  icon: Icons.analytics,
-                  color: Colors.green,
-                  change: '+2.3%',
-                ),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 24),
-          Text(
-            '待办事项',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          const Card(
-            child: Column(
-              children: [
-                TodoItem(
-                  title: '完成实验室设备年度盘点',
-                  deadline: '今天',
-                  priority: 'high',
-                ),
-                Divider(height: 1),
-                TodoItem(
-                  title: '审核精密仪器采购申请',
-                  deadline: '明天',
-                  priority: 'medium',
-                ),
-                Divider(height: 1),
-                TodoItem(
-                  title: '协调机械设备维修事宜',
-                  deadline: '后天',
-                  priority: 'low',
-                ),
-              ],
             ),
-          ),
-          
-          const SizedBox(height: 24),
-          Text(
-            '最近活动',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          const Card(
-            child: Column(
-              children: [
-                ActivityItem(
-                  title: '激光切割机 #A2201 已借出',
-                  time: '10分钟前',
-                  user: '材料实验室 - 陈研究员',
-                ),
-                Divider(height: 1),
-                ActivityItem(
-                  title: '高精度示波器 #E0512 已归还',
-                  time: '1小时前',
-                  user: '电子实验室 - 王工程师',
-                ),
-                Divider(height: 1),
-                ActivityItem(
-                  title: '新设备 3D扫描仪 已入库',
-                  time: '今天上午',
-                  user: '设备管理部 - 李主管',
-                ),
-              ],
-            ),
-          ),
+
+          // 库存预警和归还提醒
+          if (_isLoading)
+            const Center(
+              child: Column(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('正在加载预警和提醒信息...'),
+                ],
+              ),
+            )
+          else ...[
+            // 库存预警
+            InventoryAlertCard(alerts: _inventoryWarnings),
+            const SizedBox(height: 16),
+            
+            // 归还提醒
+            ReturnReminderCard(reminders: _returnReminders),
+          ],
         ],
       ),
     );

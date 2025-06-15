@@ -104,3 +104,81 @@ class Item {
     };
   }
 }
+
+/// 库存预警模型
+class MaterialAlert {
+  final int materialId;       // 物资ID
+  final String materialName;  // 物资名称
+  final int currentQuantity;  // 当前库存数量
+  final int alertThreshold;   // 预警阈值
+
+  const MaterialAlert({
+    required this.materialId,
+    required this.materialName,
+    required this.currentQuantity,
+    required this.alertThreshold,
+  });
+
+  /// 从JSON映射创建MaterialAlert实例
+  factory MaterialAlert.fromJson(Map<String, dynamic> json) {
+    return MaterialAlert(
+      materialId: json['materialId'] is int ? json['materialId'] : int.tryParse(json['materialId']?.toString() ?? '0') ?? 0,
+      materialName: json['materialName']?.toString() ?? '',
+      currentQuantity: json['currentQuantity'] is int ? json['currentQuantity'] : int.tryParse(json['currentQuantity']?.toString() ?? '0') ?? 0,
+      alertThreshold: json['alertThreshold'] is int ? json['alertThreshold'] : int.tryParse(json['alertThreshold']?.toString() ?? '0') ?? 0,
+    );
+  }
+
+  /// 将MaterialAlert实例转换为JSON映射
+  Map<String, dynamic> toJson() {
+    return {
+      'materialId': materialId,
+      'materialName': materialName,
+      'currentQuantity': currentQuantity,
+      'alertThreshold': alertThreshold,
+    };
+  }
+}
+
+/// 物资归还提醒模型
+class ReturnReminder {
+  final int materialId;    // 物资ID
+  final String materialName; // 物资名称
+  final String borrower;   // 借用人姓名
+  final DateTime dueDate;  // 归还截止日期
+
+  const ReturnReminder({
+    required this.materialId,
+    required this.materialName,
+    required this.borrower,
+    required this.dueDate,
+  });
+
+  /// 从JSON映射创建ReturnReminder实例
+  factory ReturnReminder.fromJson(Map<String, dynamic> json) {
+    return ReturnReminder(
+      materialId: json['materialId'] is int ? json['materialId'] : int.tryParse(json['materialId']?.toString() ?? '0') ?? 0,
+      materialName: json['materialName']?.toString() ?? '',
+      borrower: json['borrower']?.toString() ?? '',
+      dueDate: json['dueDate'] != null 
+        ? DateTime.tryParse(json['dueDate']?.toString() ?? '') ?? DateTime.now()
+        : DateTime.now(),
+    );
+  }
+
+  /// 将ReturnReminder实例转换为JSON映射
+  Map<String, dynamic> toJson() {
+    return {
+      'materialId': materialId,
+      'materialName': materialName,
+      'borrower': borrower,
+      'dueDate': dueDate.toIso8601String(),
+    };
+  }
+
+  /// 是否已逾期
+  bool get isOverdue => DateTime.now().isAfter(dueDate);
+
+  /// 距离截止日期的天数
+  int get daysUntilDue => dueDate.difference(DateTime.now()).inDays;
+}

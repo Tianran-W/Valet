@@ -138,13 +138,43 @@ class InventoryService {
     try {
       logger.info('正在获取用户借用记录: userId=$userId', tag: _tag);
       
-      final borrowings = await _apiService.workspaceApi.getBorrowingsByUserId(userId);
+      final result = await _apiService.workspaceApi.getBorrowingsByUserId(userId);
       
-      logger.debug('成功获取用户借用记录, 共${borrowings.length}条记录', tag: _tag);
-      return borrowings;
+      logger.debug('成功获取用户借用记录, 共${result.length}条记录', tag: _tag);
+      return result;
     } catch (e) {
       logger.error('获取用户借用记录失败', tag: _tag, error: e, stackTrace: StackTrace.current);
       throw Exception('获取用户借用记录失败: $e');
+    }
+  }
+
+  /// 获取库存预警列表
+  Future<List<MaterialAlert>> getInventoryWarnings() async {
+    try {
+      logger.info('正在获取库存预警列表', tag: _tag);
+      
+      final result = await _apiService.workspaceApi.getInventoryWarnings();
+      
+      logger.debug('成功获取库存预警列表, 共${result.length}条记录', tag: _tag);
+      return result;
+    } catch (e) {
+      logger.error('获取库存预警列表失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('获取库存预警列表失败: $e');
+    }
+  }
+
+  /// 获取物资归还提醒列表
+  Future<List<ReturnReminder>> getReturnReminders() async {
+    try {
+      logger.info('正在获取物资归还提醒列表', tag: _tag);
+      
+      final result = await _apiService.workspaceApi.getReturnReminders();
+      
+      logger.debug('成功获取物资归还提醒列表, 共${result.length}条记录', tag: _tag);
+      return result;
+    } catch (e) {
+      logger.error('获取物资归还提醒列表失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('获取物资归还提醒列表失败: $e');
     }
   }
 

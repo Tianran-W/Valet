@@ -10,6 +10,8 @@ class WorkspaceApi {
   /// 构造函数
   WorkspaceApi(this._apiClient);
   
+  // =================== 物资相关 API ===================
+  
   /// 获取所有物品类别
   Future<List<Category>> getCategories() async {
     final List<dynamic> response = await _apiClient.get('/admin/materialsCategories');
@@ -122,6 +124,18 @@ class WorkspaceApi {
     
     // 返回该用户借用的物品ID列表
     return response.map<int>((item) => item['materialId'] as int).toList();
+  }
+
+  /// 获取库存预警
+  Future<List<MaterialAlert>> getInventoryWarnings() async {
+    final List<dynamic> response = await _apiClient.get('/admin/materialAlerts');
+    return response.map((json) => MaterialAlert.fromJson(json)).toList();
+  }
+  
+  /// 获取物资归还提醒
+  Future<List<ReturnReminder>> getReturnReminders() async {
+    final List<dynamic> response = await _apiClient.get('/returnReminders');
+    return response.map((json) => ReturnReminder.fromJson(json)).toList();
   }
 
   // =================== 审批相关 API ===================
