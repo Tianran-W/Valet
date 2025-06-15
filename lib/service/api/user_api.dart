@@ -107,19 +107,17 @@ class UserApi {
   }
 
   /// 修改密码
-  /// [userId] 用户ID
   /// [oldPassword] 原密码
   /// [newPassword] 新密码
   /// 返回修改结果
-  Future<bool> changePassword(String userId, String oldPassword, String newPassword) async {
+  Future<bool> changePassword(String oldPassword, String newPassword) async {
     try {
       final Map<String, dynamic> changePasswordData = {
-        'userId': userId,
-        'oldPassword': oldPassword,
+        'currentPassword': oldPassword,
         'newPassword': newPassword,
       };
       
-      await _apiClient.put('/user/$userId/password', body: changePasswordData);
+      await _apiClient.put('/user/password', body: changePasswordData);
       return true;
     } catch (e) {
       logger.error('修改密码失败: $e');

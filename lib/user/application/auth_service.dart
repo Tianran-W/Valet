@@ -154,7 +154,6 @@ class AuthService {
       
       // 调用修改密码API
       final success = await _apiService.userApi.changePassword(
-        _currentUser!.id, 
         oldPassword, 
         newPassword
       );

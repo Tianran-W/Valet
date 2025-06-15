@@ -7,6 +7,7 @@ import 'package:valet/workspace/presentation/pages/inventory_page.dart';
 import 'package:valet/workspace/presentation/pages/module_pages.dart';
 import 'package:valet/user/application/auth_service.dart';
 import 'package:valet/user/presentation/pages/login_page.dart';
+import 'package:valet/user/presentation/pages/user_settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -69,6 +70,18 @@ class _HomePageState extends State<HomePage> {
               subtitle: Text(_authService.currentUser?.email ?? ''),
             ),
             const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('用户设置'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const UserSettingsPage(),
+                  ),
+                );
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('登出'),
