@@ -40,6 +40,7 @@ class AuthService {
           username: response['username']?.toString() ?? username,
           email: response['email']?.toString() ?? '$username@example.com',
           avatarUrl: response['avatarUrl']?.toString(),
+          role: UserRole.fromString(response['role']?.toString()),
         );
         
         _isLoggedIn = true;
@@ -96,6 +97,10 @@ class AuthService {
           if (response != null && response['isAuthenticated'] == true) {
             logger.debug('Session验证成功', tag: _tag);
             _isLoggedIn = true;
+            
+            // 获取并更新用户角色信息
+            await _updateUserRole();
+            
             return true;
           }
         } catch (e) {
@@ -168,6 +173,63 @@ class AuthService {
     } catch (e) {
       logger.error('修改密码失败', tag: _tag, error: e, stackTrace: StackTrace.current);
       throw Exception('修改密码失败: $e');
+    }
+  }
+
+  /// 更新用户角色信息
+  Future<void> _updateUserRole() async {
+    try {
+      if (_currentUser == null) return;
+      
+      final response = await _apiService.userApi.getUserRole();
+      if (response != null && response['role'] != null) {
+        final newRole = UserRole.fromString(response['role'].toString());
+        
+        // 如果角色发生变化，更新用户信息
+        if (_currentUser!.role != newRole) {
+          _currentUser = User(
+            id: _currentUser!.id,
+            username: _currentUser!.username,
+            email: _currentUser!.email,
+            avatarUrl: _currentUser!.avatarUrl,
+            role: newRole,
+          );
+          logger.info('用户角色已更新: ${newRole.displayName}', tag: _tag);
+        }
+      }
+    } catch (e) {
+      logger.warning('更新用户角色失败: $e', tag: _tag);
+      // 不抛出异常，因为这是可选的更新操作
+    }
+  }
+
+  /// 获取用户角色
+  Future<UserRole?> getUserRole() async {
+    try {
+      if (_currentUser == null) {
+        throw Exception('用户未登录');
+      }
+      
+      final response = await _apiService.userApi.getUserRole();
+      if (response != null && response['role'] != null) {
+        final role = UserRole.fromString(response['role'].toString());
+        
+        // 更新本地用户角色信息
+        _currentUser = User(
+          id: _currentUser!.id,
+          username: _currentUser!.username,
+          email: _currentUser!.email,
+          avatarUrl: _currentUser!.avatarUrl,
+          role: role,
+        );
+        
+        return role;
+      }
+      
+      return _currentUser?.role;
+    } catch (e) {
+      logger.error('获取用户角色失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('获取用户角色失败: $e');
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:valet/startup/startup.dart';
+import 'package:valet/user/application/auth_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/presentation/widgets/dashboard/return_reminder.dart';
@@ -14,6 +15,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   late InventoryService _inventoryService;
+  late AuthService _authService;
   
   // 数据状态
   List<MaterialAlert> _inventoryWarnings = [];
@@ -26,6 +28,7 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _inventoryService = getIt<InventoryService>();
+    _authService = getIt<AuthService>();
     _loadDashboardData();
   }
 
@@ -40,17 +43,28 @@ class _DashboardPageState extends State<DashboardPage> {
     });
 
     try {
-      // 并行加载库存预警和归还提醒
-      final results = await Future.wait([
-        _inventoryService.getInventoryWarnings(),
-        _inventoryService.getReturnReminders(),
-      ]);
+      if (_authService.currentUser?.isAdmin == true) {
+        // 管理员加载库存预警和所有归还提醒
+        final results = await Future.wait([
+          _inventoryService.getInventoryWarnings(),
+          _inventoryService.getReturnReminders(),
+        ]);
 
-      setState(() {
-        _inventoryWarnings = results[0] as List<MaterialAlert>;
-        _returnReminders = results[1] as List<ReturnReminder>;
-        _isLoading = false;
-      });
+        setState(() {
+          _inventoryWarnings = results[0] as List<MaterialAlert>;
+          _returnReminders = results[1] as List<ReturnReminder>;
+          _isLoading = false;
+        });
+      } else {
+        // 普通用户只加载归还提醒（只显示自己的）
+        final returnReminders = await _inventoryService.getReturnReminders();
+        
+        setState(() {
+          _inventoryWarnings = []; // 普通用户不需要看到库存预警
+          _returnReminders = returnReminders;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -76,13 +90,42 @@ class _DashboardPageState extends State<DashboardPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '欢迎回来，管理员',
+                      '欢迎回来，${_authService.currentUser?.username ?? "用户"}',
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 5),
-                    Text(
-                      '今天是 ${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
-                      style: Theme.of(context).textTheme.bodyLarge,
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _authService.currentUser?.isAdmin == true 
+                                ? Colors.red.shade100 
+                                : Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _authService.currentUser?.isAdmin == true 
+                                  ? Colors.red.shade300 
+                                  : Colors.blue.shade300,
+                            ),
+                          ),
+                          child: Text(
+                            _authService.currentUser?.role.displayName ?? '用户',
+                            style: TextStyle(
+                              color: _authService.currentUser?.isAdmin == true 
+                                  ? Colors.red.shade700 
+                                  : Colors.blue.shade700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          '今天是 ${DateTime.now().year}年${DateTime.now().month}月${DateTime.now().day}日',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -131,23 +174,23 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
             ),
 
-          // 库存预警和归还提醒
+          // 数据显示区域
           if (_isLoading)
             const Center(
               child: Column(
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('正在加载预警和提醒信息...'),
+                  Text('正在加载数据...'),
                 ],
               ),
             )
-          else ...[
-            // 库存预警
+          else if (_authService.currentUser?.isAdmin == true) ...[
+            // 管理员可以看到库存预警和所有归还提醒
             InventoryAlertCard(alerts: _inventoryWarnings),
             const SizedBox(height: 16),
-            
-            // 归还提醒
+            ReturnReminderCard(reminders: _returnReminders),
+          ] else ...[
             ReturnReminderCard(reminders: _returnReminders),
           ],
         ],

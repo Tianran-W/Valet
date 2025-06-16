@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:valet/startup/startup.dart';
+import 'package:valet/user/application/auth_service.dart';
 import 'package:valet/workspace/application/approval_service.dart';
 import 'package:valet/workspace/models/approval_model.dart';
 import 'package:valet/workspace/presentation/widgets/approval/approval_widgets.dart';
@@ -15,6 +16,7 @@ class ApprovalPage extends StatefulWidget {
 class _ApprovalPageState extends State<ApprovalPage> {
   // 服务实例
   late ApprovalService _approvalService;
+  late AuthService _authService;
   
   // 审批数据
   List<Approval> _approvals = [];
@@ -33,6 +35,7 @@ class _ApprovalPageState extends State<ApprovalPage> {
     
     // 初始化服务
     _approvalService = getIt<ApprovalService>();
+    _authService = getIt<AuthService>();
     
     // 加载真实数据
     _loadApprovalData();
@@ -82,6 +85,36 @@ class _ApprovalPageState extends State<ApprovalPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 检查用户权限，只有管理员才能看到审批页面
+    if (!(_authService.currentUser?.isAdmin ?? false)) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.no_accounts,
+                size: 64,
+                color: Colors.grey[400],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '权限不足',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '只有管理员才能访问审批功能',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),

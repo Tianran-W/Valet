@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:valet/startup/startup.dart';
+import 'package:valet/user/application/auth_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/presentation/widgets/inventory/inventory_widgets.dart';
@@ -36,6 +37,7 @@ class _InventoryPageState extends State<InventoryPage> {
   
   // API服务
   late InventoryService _inventoryService;
+  late AuthService _authService;
   
   // 物品数据
   List<Item> _inventoryItems = [];
@@ -322,6 +324,7 @@ class _InventoryPageState extends State<InventoryPage> {
     super.initState();
     // 初始化API服务
     _inventoryService = getIt<InventoryService>();
+    _authService = getIt<AuthService>();
 
     // 加载数据
     _loadInventoryItems();
@@ -416,17 +419,20 @@ class _InventoryPageState extends State<InventoryPage> {
                       label: const Text('导出'),
                     ),
                     const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      onPressed: _showAddCategoryDialog,
-                      icon: const Icon(Icons.category),
-                      label: const Text('添加分类'),
-                    ),
-                    const SizedBox(width: 8),
-                    FilledButton.icon(
-                      onPressed: _showAddItemDialog,
-                      icon: const Icon(Icons.add),
-                      label: const Text('添加物资'),
-                    ),
+                    // 只有管理员才能添加分类
+                    if (_authService.currentUser?.isAdmin ?? false) ...[
+                      OutlinedButton.icon(
+                        onPressed: _showAddCategoryDialog,
+                        icon: const Icon(Icons.category),
+                        label: const Text('添加分类'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: _showAddItemDialog,
+                        icon: const Icon(Icons.add),
+                        label: const Text('添加物资'),
+                      ),
+                    ],
                   ],
                 ),
               ],

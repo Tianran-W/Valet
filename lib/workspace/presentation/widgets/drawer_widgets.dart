@@ -4,7 +4,13 @@ import 'package:flutter/material.dart';
 class DrawerMenuItem {
   final String title;
   final IconData icon;
-  const DrawerMenuItem({required this.title, required this.icon});
+  final bool requiresAdmin; // 是否需要管理员权限
+  
+  const DrawerMenuItem({
+    required this.title, 
+    required this.icon, 
+    this.requiresAdmin = false, // 默认不需要管理员权限
+  });
 }
 
 // Drawer菜单项小部件

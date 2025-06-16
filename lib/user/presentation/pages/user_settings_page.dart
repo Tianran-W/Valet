@@ -92,6 +92,25 @@ class _UserSettingsPageState extends State<UserSettingsPage> {
                                 color: Colors.grey[600],
                               ),
                             ),
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: user?.isAdmin == true ? Colors.red.shade100 : Colors.blue.shade100,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: user?.isAdmin == true ? Colors.red.shade300 : Colors.blue.shade300,
+                                ),
+                              ),
+                              child: Text(
+                                user?.role.displayName ?? '用户',
+                                style: TextStyle(
+                                  color: user?.isAdmin == true ? Colors.red.shade700 : Colors.blue.shade700,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),

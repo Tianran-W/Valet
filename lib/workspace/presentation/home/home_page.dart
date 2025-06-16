@@ -38,19 +38,47 @@ class _HomePageState extends State<HomePage> {
   ];
 
   // 菜单项数据结构
-  final List<DrawerMenuItem> _drawerMenuItems = [
-    DrawerMenuItem(title: '仪表盘', icon: Icons.dashboard),
-    DrawerMenuItem(title: '库存管理', icon: Icons.inventory),
-    DrawerMenuItem(title: '请求审批', icon: Icons.approval),
-    DrawerMenuItem(title: '采购管理', icon: Icons.shopping_cart),
-    DrawerMenuItem(title: '人力资源', icon: Icons.people),
-    DrawerMenuItem(title: '系统设置', icon: Icons.settings),
+  final List<DrawerMenuItem> _allDrawerMenuItems = [
+    DrawerMenuItem(title: '仪表盘', icon: Icons.dashboard, requiresAdmin: false),
+    DrawerMenuItem(title: '库存管理', icon: Icons.inventory, requiresAdmin: false),
+    DrawerMenuItem(title: '请求审批', icon: Icons.approval, requiresAdmin: true), // 只有管理员能看到
+    DrawerMenuItem(title: '采购管理', icon: Icons.shopping_cart, requiresAdmin: true), // 只有管理员能看到
+    DrawerMenuItem(title: '人力资源', icon: Icons.people, requiresAdmin: true), // 只有管理员能看到
+    DrawerMenuItem(title: '系统设置', icon: Icons.settings, requiresAdmin: true), // 只有管理员能看到
   ];
 
+  /// 根据用户角色获取可见的菜单项
+  List<DrawerMenuItem> get _visibleDrawerMenuItems {
+    final isAdmin = _authService.currentUser?.isAdmin ?? false;
+    if (isAdmin) {
+      return _allDrawerMenuItems; // 管理员可以看到所有菜单
+    } else {
+      return _allDrawerMenuItems.where((item) => !item.requiresAdmin).toList(); // 普通用户只能看到不需要管理员权限的菜单
+    }
+  }
+
+  /// 根据用户角色获取可见的页面
+  List<Widget> get _visiblePages {
+    final isAdmin = _authService.currentUser?.isAdmin ?? false;
+    if (isAdmin) {
+      return _pages; // 管理员可以访问所有页面
+    } else {
+      // 普通用户只能访问前两个页面（仪表盘和库存管理）
+      return [
+        const DashboardPage(),
+        const InventoryPage(),
+      ];
+    }
+  }
+
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    // 确保索引在可见页面范围内
+    final visiblePages = _visiblePages;
+    if (index < visiblePages.length) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   /// 显示用户菜单
@@ -63,11 +91,23 @@ class _HomePageState extends State<HomePage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const CircleAvatar(
-                child: Icon(Icons.person),
+              leading: CircleAvatar(
+                child: Text(
+                  (_authService.currentUser?.username ?? '用户').substring(0, 1).toUpperCase(),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
               title: Text(_authService.currentUser?.username ?? '用户'),
-              subtitle: Text(_authService.currentUser?.email ?? ''),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(_authService.currentUser?.email ?? ''),
+                  Text(
+                    _authService.currentUser?.role.displayName ?? '用户',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
             const Divider(),
             ListTile(
@@ -155,23 +195,27 @@ class _HomePageState extends State<HomePage> {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary,
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(
                     radius: 30,
+                    child: Text(
+                      (_authService.currentUser?.username ?? '用户').substring(0, 1).toUpperCase(),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Text(
-                    '科研设备管理',
-                    style: TextStyle(
+                    _authService.currentUser?.username ?? '科研设备管理',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                     ),
                   ),
                   Text(
-                    '管理员',
-                    style: TextStyle(
+                    _authService.currentUser?.role.displayName ?? '用户',
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
                     ),
@@ -180,11 +224,11 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             // 用 map 生成菜单项
-            ..._drawerMenuItems.asMap().entries.map((entry) {
+            ..._visibleDrawerMenuItems.asMap().entries.map((entry) {
               final idx = entry.key;
               final item = entry.value;
-              // 在第7项后插入分割线
-              if (idx == 7) {
+              // 在第2项后插入分割线（仪表盘和库存管理后）
+              if (idx == 2 && _authService.currentUser?.isAdmin == true) {
                 return Column(
                   children: [
                     const Divider(),
@@ -215,7 +259,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: _pages[_selectedIndex],
+      body: _visiblePages[_selectedIndex],
     );
   }
 }

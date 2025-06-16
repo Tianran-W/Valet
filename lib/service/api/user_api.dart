@@ -1,5 +1,4 @@
 import 'package:valet/service/logger_service.dart';
-import 'package:valet/user/models/user_model.dart';
 import 'api_client.dart';
 
 /// 用户 API 类，处理用户相关的 API 请求
@@ -58,30 +57,15 @@ class UserApi {
     return response;
   }
 
-  /// 获取用户信息
-  /// [userId] 用户ID
-  Future<User?> getUserInfo(String userId) async {
+  /// 获取用户角色
+  /// 返回用户角色信息
+  Future<Map<String, dynamic>?> getUserRole() async {
     try {
-      final response = await _apiClient.get('/user/$userId');
-      if (response != null) {
-        return User.fromJson(response);
-      }
-      return null;
+      final response = await _apiClient.get('/user/role');
+      return response;
     } catch (e) {
-      logger.error('获取用户信息失败: $e');
-      throw Exception('获取用户信息失败: $e');
-    }
-  }
-
-  /// 更新用户信息
-  /// [user] 用户信息
-  Future<bool> updateUserInfo(User user) async {
-    try {
-      await _apiClient.put('/user/${user.id}', body: user.toJson());
-      return true;
-    } catch (e) {
-      logger.error('更新用户信息失败: $e');
-      throw Exception('更新用户信息失败: $e');
+      logger.error('获取用户角色失败: $e');
+      throw Exception('获取用户角色失败: $e');
     }
   }
 
