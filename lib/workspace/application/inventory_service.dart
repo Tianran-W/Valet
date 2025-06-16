@@ -200,4 +200,27 @@ class InventoryService {
       throw Exception('归还物品失败: $e');
     }
   }
+
+  /// 获取推荐物资列表
+  /// [projectType]: 项目类型
+  /// [participantCount]: 参与人数
+  Future<List<RecommendedMaterial>> getRecommendedMaterials({
+    required String projectType,
+    required int participantCount,
+  }) async {
+    try {
+      logger.info('正在获取推荐物资列表: projectType=$projectType, participantCount=$participantCount', tag: _tag);
+      
+      final result = await _apiService.workspaceApi.getRecommendedMaterials(
+        projectType: projectType,
+        participantCount: participantCount,
+      );
+      
+      logger.debug('成功获取推荐物资列表, 共${result.length}条记录', tag: _tag);
+      return result;
+    } catch (e) {
+      logger.error('获取推荐物资列表失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('获取推荐物资列表失败: $e');
+    }
+  }
 }

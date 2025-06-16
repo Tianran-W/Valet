@@ -5,7 +5,6 @@ import 'package:valet/startup/startup.dart';
 
 /// 功能标志管理类
 /// 用于控制应用中的功能开关
-/// TODO: 功能暂未使用
 class FeatureFlags {
   static final FeatureFlags _instance = FeatureFlags._internal();
   factory FeatureFlags() => _instance;

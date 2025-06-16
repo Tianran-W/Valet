@@ -182,3 +182,38 @@ class ReturnReminder {
   /// 距离截止日期的天数
   int get daysUntilDue => dueDate.difference(DateTime.now()).inDays;
 }
+
+/// 推荐物资模型类
+class RecommendedMaterial {
+  final int materialId;
+  final String materialName;
+  final String recommendReason;
+  final double avgUsage;
+
+  const RecommendedMaterial({
+    required this.materialId,
+    required this.materialName,
+    required this.recommendReason,
+    required this.avgUsage,
+  });
+
+  /// 从JSON映射创建RecommendedMaterial实例
+  factory RecommendedMaterial.fromJson(Map<String, dynamic> json) {
+    return RecommendedMaterial(
+      materialId: json['materialId'] is int ? json['materialId'] : int.tryParse(json['materialId']?.toString() ?? '0') ?? 0,
+      materialName: json['materialName']?.toString() ?? '',
+      recommendReason: json['recommendReason']?.toString() ?? '',
+      avgUsage: (json['avgUsage'] is num) ? json['avgUsage'].toDouble() : 0.0,
+    );
+  }
+
+  /// 将RecommendedMaterial实例转换为JSON映射
+  Map<String, dynamic> toJson() {
+    return {
+      'materialId': materialId,
+      'materialName': materialName,
+      'recommendReason': recommendReason,
+      'avgUsage': avgUsage,
+    };
+  }
+}

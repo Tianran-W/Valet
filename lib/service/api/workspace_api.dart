@@ -138,6 +138,22 @@ class WorkspaceApi {
     return response.map((json) => ReturnReminder.fromJson(json)).toList();
   }
 
+  /// 获取推荐物资列表
+  /// [projectType]: 项目类型
+  /// [participantCount]: 参与人数
+  Future<List<RecommendedMaterial>> getRecommendedMaterials({
+    required String projectType,
+    required int participantCount,
+  }) async {
+    final Map<String, dynamic> body = {
+      'projectType': projectType,
+      'participantCount': participantCount,
+    };
+    
+    final List<dynamic> response = await _apiClient.post('/recommendMaterials', body: body);
+    return response.map((json) => RecommendedMaterial.fromJson(json)).toList();
+  }
+
   // =================== 审批相关 API ===================
 
   /// 获取待审批列表

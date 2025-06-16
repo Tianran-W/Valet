@@ -5,6 +5,7 @@ import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/presentation/widgets/dashboard/return_reminder.dart';
 import 'package:valet/workspace/presentation/widgets/dashboard/inventory_alert.dart';
+import 'package:valet/workspace/presentation/widgets/dashboard/recommended_materials.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -20,9 +21,14 @@ class _DashboardPageState extends State<DashboardPage> {
   // 数据状态
   List<MaterialAlert> _inventoryWarnings = [];
   List<ReturnReminder> _returnReminders = [];
+  List<RecommendedMaterial> _recommendedMaterials = [];
   bool _isLoading = false;
   bool _hasError = false;
   String _errorMessage = "";
+  
+  // 推荐物资配置
+  String? _projectType;
+  int? _participantCount;
 
   @override
   void initState() {
@@ -72,6 +78,49 @@ class _DashboardPageState extends State<DashboardPage> {
         _errorMessage = e.toString();
       });
     }
+  }
+
+  /// 获取推荐物资
+  Future<void> _loadRecommendedMaterials() async {
+    if (_projectType == null || _participantCount == null) return;
+    
+    try {
+      final materials = await _inventoryService.getRecommendedMaterials(
+        projectType: _projectType!,
+        participantCount: _participantCount!,
+      );
+      
+      setState(() {
+        _recommendedMaterials = materials;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('获取推荐物资失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// 显示推荐配置对话框
+  void _showRecommendationConfigDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => RecommendationConfigDialog(
+        initialProjectType: _projectType,
+        initialParticipantCount: _participantCount,
+        onSubmit: (projectType, participantCount) {
+          setState(() {
+            _projectType = projectType;
+            _participantCount = participantCount;
+          });
+          _loadRecommendedMaterials();
+        },
+      ),
+    );
   }
 
   @override
@@ -141,6 +190,11 @@ class _DashboardPageState extends State<DashboardPage> {
                 tooltip: '刷新数据',
                 onPressed: _isLoading ? null : _loadDashboardData,
               ),
+              IconButton(
+                icon: const Icon(Icons.lightbulb_outline),
+                tooltip: '获取推荐物资',
+                onPressed: _showRecommendationConfigDialog,
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -185,13 +239,24 @@ class _DashboardPageState extends State<DashboardPage> {
                 ],
               ),
             )
-          else if (_authService.currentUser?.isAdmin == true) ...[
-            // 管理员可以看到库存预警和所有归还提醒
-            InventoryAlertCard(alerts: _inventoryWarnings),
+          else ...[
+            // 推荐物资卡片（所有用户都可以看到）
+            RecommendedMaterialsCard(
+              materials: _recommendedMaterials,
+              onRefresh: _projectType != null && _participantCount != null 
+                  ? _loadRecommendedMaterials 
+                  : null,
+            ),
             const SizedBox(height: 16),
-            ReturnReminderCard(reminders: _returnReminders),
-          ] else ...[
-            ReturnReminderCard(reminders: _returnReminders),
+            
+            if (_authService.currentUser?.isAdmin == true) ...[
+              // 管理员可以看到库存预警和所有归还提醒
+              InventoryAlertCard(alerts: _inventoryWarnings),
+              const SizedBox(height: 16),
+              ReturnReminderCard(reminders: _returnReminders),
+            ] else ...[
+              ReturnReminderCard(reminders: _returnReminders),
+            ],
           ],
         ],
       ),
