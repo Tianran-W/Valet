@@ -53,7 +53,8 @@ class _InventoryPageState extends State<InventoryPage> {
       // 根据搜索词过滤
       final matchesSearch = _searchQuery.isEmpty || 
           item.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          item.id.toString().contains(_searchQuery);
+          item.id.toString().contains(_searchQuery) ||
+          (item.serialNumber != null && item.serialNumber!.toLowerCase().contains(_searchQuery.toLowerCase()));
       
       // 根据分类过滤
       final matchesCategory = _categoryQuery.isEmpty || 

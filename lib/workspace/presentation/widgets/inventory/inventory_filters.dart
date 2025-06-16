@@ -46,7 +46,7 @@ class InventoryFilters extends StatelessWidget {
               child: TextField(
                 controller: searchController,
                 decoration: InputDecoration(
-                  hintText: '搜索物资名称或ID',
+                  hintText: '搜索物资名称、ID或SN码',
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
