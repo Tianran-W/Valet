@@ -8,6 +8,7 @@ class InventoryItemList extends StatelessWidget {
   final Function(Item) onItemTap;
   final Function(Item) onItemBorrow;
   final Function(Item) onItemReturn;
+  final Function(Item) onItemScrap;
   final Function(Item) onItemMoreActions;
 
   const InventoryItemList({
@@ -16,6 +17,7 @@ class InventoryItemList extends StatelessWidget {
     required this.onItemTap,
     required this.onItemBorrow,
     required this.onItemReturn,
+    required this.onItemScrap,
     required this.onItemMoreActions,
   });
 
@@ -35,6 +37,7 @@ class InventoryItemList extends StatelessWidget {
                   onTap: onItemTap,
                   onBorrow: onItemBorrow,
                   onReturn: onItemReturn,
+                  onScrap: onItemScrap,
                   onMoreActions: onItemMoreActions,
                 );
               },

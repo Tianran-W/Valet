@@ -154,6 +154,22 @@ class WorkspaceApi {
     return response.map((json) => RecommendedMaterial.fromJson(json)).toList();
   }
 
+  /// 物资报废
+  /// [materialId]: 物资ID
+  /// [reason]: 报废原因
+  Future<bool> scrapMaterial({
+    required int materialId,
+    required String reason,
+  }) async {
+    final Map<String, dynamic> body = {
+      'materialId': materialId,
+      'reason': reason,
+    };
+    
+    await _apiClient.post('/material/scrap', body: body);
+    return true;
+  }
+  
   // =================== 审批相关 API ===================
 
   /// 获取待审批列表

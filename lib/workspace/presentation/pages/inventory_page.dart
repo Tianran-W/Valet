@@ -112,6 +112,16 @@ class _InventoryPageState extends State<InventoryPage> {
             },
             child: const Text('归还'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showScrapItemDialog(item);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('报废'),
+          ),
         ],
       ),
     );
@@ -307,6 +317,65 @@ class _InventoryPageState extends State<InventoryPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('归还失败: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  // 显示物资报废对话框
+  Future<void> _showScrapItemDialog(Item item) async {
+    // 检查物资状态，已报废的物资不能再次报废
+    if (item.status == InventoryStatus.scrapped) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('物资: ${item.name} 已经是报废状态，无法重复报废'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final result = await showDialog(
+      context: context,
+      builder: (context) => ScrapItemDialog(
+        item: item,
+      ),
+    );
+    
+    if (result != null && mounted) {
+      try {
+        // 显示加载中提示
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('正在处理报废申请...')),
+        );
+        
+        // 执行报废操作
+        await _inventoryService.scrapMaterial(
+          materialId: result['materialId'],
+          reason: result['reason'],
+        );
+        
+        if (mounted) {
+          // 显示成功提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('物资报废成功'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          
+          // 重新加载数据
+          _loadInventoryItems();
+        }
+      } catch (e) {
+        if (mounted) {
+          // 显示错误提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('报废失败: $e'),
               backgroundColor: Colors.red,
             ),
           );
@@ -538,6 +607,7 @@ class _InventoryPageState extends State<InventoryPage> {
                     onItemTap: _showItemDetails,
                     onItemBorrow: _showBorrowItemDialog,
                     onItemReturn: _showReturnItemDialog,
+                    onItemScrap: _showScrapItemDialog,
                     onItemMoreActions: (item) {
                       // 显示更多操作菜单
                       ScaffoldMessenger.of(context).showSnackBar(

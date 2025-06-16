@@ -201,6 +201,28 @@ class InventoryService {
     }
   }
 
+  /// 物资报废
+  /// [materialId]: 物资ID
+  /// [reason]: 报废原因
+  Future<void> scrapMaterial({
+    required int materialId,
+    required String reason,
+  }) async {
+    try {
+      logger.info('正在报废物资: $materialId, 原因: $reason', tag: _tag);
+      
+      await _apiService.workspaceApi.scrapMaterial(
+        materialId: materialId,
+        reason: reason,
+      );
+      
+      logger.debug('成功报废物资: $materialId', tag: _tag);
+    } catch (e) {
+      logger.error('物资报废失败', tag: _tag, error: e, stackTrace: StackTrace.current);
+      throw Exception('物资报废失败: $e');
+    }
+  }
+
   /// 获取推荐物资列表
   /// [projectType]: 项目类型
   /// [participantCount]: 参与人数

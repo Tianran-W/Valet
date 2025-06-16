@@ -8,6 +8,7 @@ class InventoryItemTile extends StatelessWidget {
   final Function(Item) onTap;
   final Function(Item) onBorrow;
   final Function(Item) onReturn;
+  final Function(Item) onScrap;
   final Function(Item) onMoreActions;
 
   const InventoryItemTile({
@@ -16,6 +17,7 @@ class InventoryItemTile extends StatelessWidget {
     required this.onTap,
     required this.onBorrow,
     required this.onReturn,
+    required this.onScrap,
     required this.onMoreActions,
   });
 
@@ -70,10 +72,54 @@ class InventoryItemTile extends StatelessWidget {
             onPressed: () => onReturn(item),
             tooltip: '归还',
           ),
-          IconButton(
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
-            onPressed: () => onMoreActions(item),
             tooltip: '更多操作',
+            onSelected: (value) {
+              switch (value) {
+                case 'scrap':
+                  onScrap(item);
+                  break;
+                case 'more':
+                  onMoreActions(item);
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'scrap',
+                enabled: item.status != InventoryStatus.scrapped,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.delete_forever,
+                      color: item.status == InventoryStatus.scrapped 
+                          ? Colors.grey 
+                          : Colors.red,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '物资报废',
+                      style: TextStyle(
+                        color: item.status == InventoryStatus.scrapped 
+                            ? Colors.grey 
+                            : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'more',
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline),
+                    SizedBox(width: 8),
+                    Text('详情'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

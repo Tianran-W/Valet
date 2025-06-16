@@ -6,7 +6,7 @@ enum InventoryStatus {
   pending('审批中'),
   onLoan('已借出'),
   maintenance('维修中'),
-  scrapped('已报废');
+  scrapped('报废');
 
   final String label;
   const InventoryStatus(this.label);
@@ -18,7 +18,7 @@ enum InventoryStatus {
       '审批中' => InventoryStatus.pending,
       '已借出' => InventoryStatus.onLoan,
       '维修中' => InventoryStatus.maintenance,
-      '已报废' => InventoryStatus.scrapped,
+      '报废' => InventoryStatus.scrapped,
       _ => InventoryStatus.inStock,
     };
   }
