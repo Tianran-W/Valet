@@ -209,12 +209,12 @@ class WorkspaceApi {
   /// [recordId]: 记录ID
   Future<List<RecordImage>> getRecordImages({
     required RecordType recordType,
-    required int recordId,
+    required int materialId,
   }) async {
     try {
-      logger.info('获取记录图片: recordType: ${recordType.value}, recordId: $recordId');
-      
-      final List<dynamic> response = await _apiClient.get('/images/record/${recordType.value}/$recordId');
+      logger.info('获取记录图片: recordType: ${recordType.value}, materialId: $materialId');
+
+      final List<dynamic> response = await _apiClient.get('/images/material/$materialId/${recordType.value}');
       return response.map((json) => RecordImage.fromJson(json)).toList();
     } catch (e) {
       logger.error('获取记录图片失败: $e');
@@ -239,7 +239,7 @@ class WorkspaceApi {
   /// 获取图片URL
   /// [imageId]: 图片ID
   String getImageUrl(int imageId) {
-    return '${_apiClient.baseUrl}/api/images/$imageId';
+    return '${_apiClient.baseUrl}/images/$imageId';
   }
 
   // =================== 审批相关 API ===================

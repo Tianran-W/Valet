@@ -12,7 +12,7 @@ import 'package:valet/startup/startup.dart';
 /// 图片上传组件
 class ImageUploadWidget extends StatefulWidget {
   final RecordType recordType;
-  final int recordId;
+  final int materialId;
   final Function(List<RecordImage>)? onImagesChanged;
   final bool readOnly;
   final int maxImages;
@@ -20,7 +20,7 @@ class ImageUploadWidget extends StatefulWidget {
   const ImageUploadWidget({
     super.key,
     required this.recordType,
-    required this.recordId,
+    required this.materialId,
     this.onImagesChanged,
     this.readOnly = false,
     this.maxImages = 5,
@@ -46,20 +46,14 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
 
   /// 加载图片列表
   Future<void> _loadImages() async {
-    // 如果是临时记录ID（时间戳），跳过加载
-    if (widget.recordId > 1000000000000) {
-      setState(() => _isLoading = false);
-      return;
-    }
-    
-    if (widget.recordId <= 0) return; // 新记录暂时不加载图片
+    if (widget.materialId <= 0) return; // 新记录暂时不加载图片
     
     setState(() => _isLoading = true);
     
     try {
       final images = await _imageService.getRecordImages(
         recordType: widget.recordType,
-        recordId: widget.recordId,
+        materialId: widget.materialId,
       );
       
       setState(() {
@@ -194,14 +188,14 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
       final response = await _imageService.uploadImage(
         filePath: filePath,
         recordType: widget.recordType,
-        recordId: widget.recordId,
+        recordId: widget.materialId,
       );
 
       // 创建新的RecordImage对象
       final newImage = RecordImage(
         imageId: response.imageId,
         recordType: widget.recordType,
-        recordId: widget.recordId,
+        recordId: widget.materialId,
         imagePath: response.imagePath,
         uploadTime: DateTime.now(),
       );

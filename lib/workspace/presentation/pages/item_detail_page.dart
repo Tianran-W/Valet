@@ -118,7 +118,7 @@ class ItemDetailPage extends StatelessWidget {
     BuildContext context,
     String title,
     RecordType recordType,
-    int recordId,
+    int materialId,
   ) {
     return Card(
       child: Padding(
@@ -133,7 +133,7 @@ class ItemDetailPage extends StatelessWidget {
             const SizedBox(height: 16),
             ImageUploadWidget(
               recordType: recordType,
-              recordId: recordId,
+              materialId: materialId,
               readOnly: true, // 详情页面为只读模式
               maxImages: 10,
             ),

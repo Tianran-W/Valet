@@ -120,7 +120,7 @@ class _ScrapItemDialogState extends State<ScrapItemDialog> {
                   ),
                   child: ImageUploadWidget(
                     recordType: RecordType.scrap,
-                    recordId: _tempRecordId,
+                    materialId: widget.item.id, // 使用物品的实际ID
                     onImagesChanged: (images) {
                       setState(() {
                         _uploadedImages = images;

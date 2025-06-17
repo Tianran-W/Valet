@@ -10,4 +10,3 @@ export 'add_category_dialog.dart';
 export 'borrow_item_dialog.dart';
 export 'return_item_dialog.dart';
 export 'scrap_item_dialog.dart';
-export 'post_action_image_upload_dialog.dart';

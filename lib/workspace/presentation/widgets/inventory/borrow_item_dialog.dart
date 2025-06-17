@@ -103,7 +103,7 @@ class _BorrowItemDialogState extends State<BorrowItemDialog> {
                   ),
                   child: ImageUploadWidget(
                     recordType: RecordType.borrow,
-                    recordId: _tempRecordId, // 使用临时ID，稍后会替换
+                    materialId: widget.item.id, // 使用物品的实际ID
                     onImagesChanged: (images) {
                       setState(() {
                         _uploadedImages = images;
