@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 import 'package:valet/workspace/models/image_model.dart';
 import 'package:valet/workspace/application/image_service.dart';
 import 'package:valet/workspace/application/permission_helper.dart';
+import 'package:valet/workspace/application/platform_helper.dart';
+import 'package:valet/workspace/presentation/widgets/image_preview_gallery.dart';
 import 'package:valet/startup/startup.dart';
 
 /// 图片上传组件
@@ -79,7 +83,7 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
     }
   }
 
-  /// 选择并上传图片
+  /// 选择并上传图片（桌面端使用文件选择器）
   Future<void> _pickAndUploadImage() async {
     if (_images.length >= widget.maxImages) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -88,22 +92,35 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
       return;
     }
 
-    // 检查相册权限
-    final hasPermission = await PermissionHelper.requestStoragePermission(context);
-    if (!hasPermission) {
-      return;
-    }
-
     try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
-      );
+      if (PlatformHelper.isDesktop) {
+        // 桌面端使用文件选择器
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.image,
+          allowMultiple: false,
+        );
 
-      if (image != null) {
-        await _uploadImage(image.path);
+        if (result != null && result.files.single.path != null) {
+          await _uploadImage(result.files.single.path!);
+        }
+      } else {
+        // 移动端使用相册选择
+        // 检查相册权限
+        final hasPermission = await PermissionHelper.requestStoragePermission(context);
+        if (!hasPermission) {
+          return;
+        }
+
+        final XFile? image = await _picker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: 1920,
+          maxHeight: 1920,
+          imageQuality: 85,
+        );
+
+        if (image != null) {
+          await _uploadImage(image.path);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -117,7 +134,7 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
     }
   }
 
-  /// 拍照并上传图片
+  /// 拍照并上传图片（支持桌面端摄像头）
   Future<void> _takeAndUploadPhoto() async {
     if (_images.length >= widget.maxImages) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -126,18 +143,21 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
       return;
     }
 
-    // 检查相机权限
-    final hasPermission = await PermissionHelper.requestCameraPermission(context);
-    if (!hasPermission) {
-      return;
-    }
-
     try {
+      if (PlatformHelper.isMobile) {
+        // 移动端检查相机权限
+        final hasPermission = await PermissionHelper.requestCameraPermission(context);
+        if (!hasPermission) {
+          return;
+        }
+      }
+
       final XFile? image = await _picker.pickImage(
         source: ImageSource.camera,
         maxWidth: 1920,
         maxHeight: 1920,
         imageQuality: 85,
+        preferredCameraDevice: CameraDevice.rear,
       );
 
       if (image != null) {
@@ -147,7 +167,7 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('拍照失败: $e'),
+            content: Text(PlatformHelper.isDesktop ? '摄像头拍照失败: $e' : '拍照失败: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -160,6 +180,29 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
     setState(() => _isLoading = true);
 
     try {
+      // 显示上传中的提示
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text('正在上传图片...'),
+              ],
+            ),
+            duration: const Duration(seconds: 10),
+          ),
+        );
+      }
+
       final response = await _imageService.uploadImage(
         filePath: filePath,
         recordType: widget.recordType,
@@ -183,10 +226,21 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
       widget.onImagesChanged?.call(_images);
 
       if (mounted) {
+        // 隐藏上传中的提示
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        
+        // 显示成功提示
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('图片上传成功'),
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 8),
+                Text('图片上传成功 (${_images.length}/${widget.maxImages})'),
+              ],
+            ),
             backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -194,9 +248,18 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
       setState(() => _isLoading = false);
       
       if (mounted) {
+        // 隐藏上传中的提示
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('图片上传失败: $e'),
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(child: Text('图片上传失败: $e')),
+              ],
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -240,8 +303,14 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('图片删除成功'),
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text('图片删除成功 (${_images.length}/${widget.maxImages})'),
+                ],
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -263,35 +332,108 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
 
   /// 预览图片
   void _previewImage(RecordImage image) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AppBar(
-              title: const Text('图片预览'),
-              leading: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-            Expanded(
-              child: CachedNetworkImage(
-                imageUrl: _imageService.getImageUrl(image.imageId),
-                fit: BoxFit.contain,
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-                errorWidget: (context, url, error) => const Center(
-                  child: Icon(Icons.error, size: 64),
-                ),
-              ),
-            ),
-          ],
+    final currentIndex = _images.indexOf(image);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ImagePreviewGallery(
+          images: _images,
+          initialIndex: currentIndex >= 0 ? currentIndex : 0,
+          readOnly: widget.readOnly,
+          onDeleteImage: widget.readOnly ? null : (imageToDelete) {
+            _deleteImageFromPreview(imageToDelete);
+          },
         ),
       ),
     );
+  }
+
+  /// 从预览中删除图片
+  Future<void> _deleteImageFromPreview(RecordImage image) async {
+    try {
+      await _imageService.deleteImage(image.imageId);
+      
+      setState(() {
+        _images.remove(image);
+      });
+      
+      widget.onImagesChanged?.call(_images);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('图片删除成功'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('图片删除失败: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// 构建图片组件，支持本地文件和网络图片
+  Widget _buildImageWidget(RecordImage image) {
+    final imageUrl = _imageService.getImageUrl(image.imageId);
+    
+    // 检查是否为本地文件路径
+    if (imageUrl.startsWith('file://')) {
+      final localPath = imageUrl.substring(7); // 移除 'file://' 前缀
+      return Image.file(
+        File(localPath),
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey.shade200,
+          child: const Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.broken_image, size: 24, color: Colors.grey),
+              SizedBox(height: 4),
+              Text(
+                '加载失败',
+                style: TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      // 网络图片
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: Colors.grey.shade100,
+          child: const Center(
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: Colors.grey.shade200,
+          child: const Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.broken_image, size: 24, color: Colors.grey),
+              SizedBox(height: 4),
+              Text(
+                '加载失败',
+                style: TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -311,15 +453,19 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    onPressed: _isLoading ? null : _takeAndUploadPhoto,
-                    icon: const Icon(Icons.camera_alt),
-                    tooltip: '拍照',
-                  ),
+                  // 桌面端不显示拍照按钮，移动端显示拍照按钮
+                  if (PlatformHelper.isMobile)
+                    IconButton(
+                      onPressed: _isLoading ? null : _takeAndUploadPhoto,
+                      icon: const Icon(Icons.camera_alt),
+                      tooltip: '拍照',
+                    ),
                   IconButton(
                     onPressed: _isLoading ? null : _pickAndUploadImage,
-                    icon: const Icon(Icons.photo_library),
-                    tooltip: '从相册选择',
+                    icon: PlatformHelper.isDesktop 
+                        ? const Icon(Icons.upload_file) 
+                        : const Icon(Icons.photo_library),
+                    tooltip: PlatformHelper.isDesktop ? '上传文件' : '从相册选择',
                   ),
                 ],
               ),
@@ -337,31 +483,52 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
               border: Border.all(color: Colors.grey.shade300),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Center(
-              child: Text(
-                '暂无图片',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    widget.readOnly 
+                        ? Icons.image_not_supported_outlined
+                        : (PlatformHelper.isDesktop ? Icons.cloud_upload : Icons.add_photo_alternate),
+                    size: 32,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.readOnly 
+                        ? '暂无相关图片'
+                        : (PlatformHelper.isDesktop 
+                            ? '点击上方按钮选择文件上传' 
+                            : '点击上方按钮拍照或选择图片'),
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           )
         else
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1,
+          SizedBox(
+            height: (_images.length / 3).ceil() * 130.0, // 动态计算高度
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 1,
+              ),
+              itemCount: _images.length,
+              itemBuilder: (context, index) {
+                final image = _images[index];
+                return _buildImageTile(image);
+              },
             ),
-            itemCount: _images.length,
-            itemBuilder: (context, index) {
-              final image = _images[index];
-              return _buildImageTile(image);
-            },
           ),
       ],
     );
@@ -381,18 +548,9 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
             // 图片
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: CachedNetworkImage(
-                imageUrl: _imageService.getImageUrl(image.imageId),
-                width: double.infinity,
-                height: double.infinity,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  color: Colors.grey.shade200,
-                  child: const Icon(Icons.broken_image, size: 32),
-                ),
+              child: Hero(
+                tag: 'image_${image.imageId}',
+                child: _buildImageWidget(image),
               ),
             ),
             

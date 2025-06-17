@@ -145,6 +145,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "7.0.1"
+  file_picker:
+    dependency: "direct main"
+    description:
+      name: file_picker
+      sha256: ef9908739bdd9c476353d6adff72e88fd00c625f5b959ae23f7567bd5137db0a
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "10.2.0"
   file_selector_linux:
     dependency: transitive
     description:
@@ -528,6 +536,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.2.1"
+  photo_view:
+    dependency: "direct main"
+    description:
+      name: photo_view
+      sha256: "1fc3d970a91295fbd1364296575f854c9863f225505c28c46e0a03e48960c75e"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.15.0"
   platform:
     dependency: transitive
     description:
@@ -717,6 +733,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.1.1"
+  win32:
+    dependency: transitive
+    description:
+      name: win32
+      sha256: "66814138c3562338d05613a6e368ed8cfb237ad6d64a9e9334be3f309acfca03"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "5.14.0"
   xdg_directories:
     dependency: transitive
     description:

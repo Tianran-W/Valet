@@ -1,6 +1,7 @@
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:valet/service/logger_service.dart';
+import 'package:valet/workspace/application/platform_helper.dart';
 
 /// 权限管理工具类
 class PermissionHelper {
@@ -8,6 +9,12 @@ class PermissionHelper {
 
   /// 检查并请求相机权限
   static Future<bool> requestCameraPermission(BuildContext context) async {
+    // 桌面端通常不需要额外的相机权限请求
+    if (PlatformHelper.isDesktop) {
+      logger.debug('桌面端跳过相机权限检查', tag: _tag);
+      return true;
+    }
+
     try {
       logger.info('正在检查相机权限', tag: _tag);
       
@@ -59,6 +66,12 @@ class PermissionHelper {
 
   /// 检查并请求相册权限
   static Future<bool> requestStoragePermission(BuildContext context) async {
+    // 桌面端使用文件选择器，不需要存储权限
+    if (PlatformHelper.isDesktop) {
+      logger.debug('桌面端跳过存储权限检查', tag: _tag);
+      return true;
+    }
+
     try {
       logger.info('正在检查存储权限', tag: _tag);
       
