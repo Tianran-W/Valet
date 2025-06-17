@@ -50,5 +50,17 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	
+	<!-- 相机权限 -->
+	<key>NSCameraUsageDescription</key>
+	<string>此应用需要访问相机来拍摄照片</string>
+	
+	<!-- 相册权限 -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>此应用需要访问相册来选择照片</string>
+	
+	<!-- iOS 14+ 的有限相册访问权限 -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>此应用需要访问相册来保存照片</string>
 </dict>
 </plist>
