@@ -3,7 +3,7 @@ import 'package:valet/startup/startup.dart';
 import 'package:valet/user/application/auth_service.dart';
 import 'package:valet/workspace/application/approval_service.dart';
 import 'package:valet/workspace/models/approval_model.dart';
-import 'package:valet/workspace/presentation/widgets/approval/approval_widgets.dart';
+import 'package:valet/workspace/presentation/widgets/approval/approval.dart';
 
 /// 请求审批页面
 class ApprovalPage extends StatefulWidget {
