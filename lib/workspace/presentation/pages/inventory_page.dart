@@ -3,7 +3,9 @@ import 'package:valet/startup/startup.dart';
 import 'package:valet/user/application/auth_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
+import 'package:valet/workspace/models/image_model.dart';
 import 'package:valet/workspace/presentation/widgets/inventory/inventory_widgets.dart';
+import 'package:valet/workspace/presentation/pages/item_detail_page.dart';
 
 class InventoryPage extends StatefulWidget {
   const InventoryPage({super.key});
@@ -75,54 +77,10 @@ class _InventoryPageState extends State<InventoryPage> {
 
   // 显示物品详情对话框
   void _showItemDetails(Item item) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('物品详情: ${item.name}'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _detailRow('物品ID', item.id),
-              _detailRow('物品名称', item.name),
-              _detailRow('类别', item.category),
-              _detailRow('数量', '${item.quantity}'),
-              _detailRow('贵重物品', item.isValuable ? '是' : '否'),
-              _detailRow('状态', item.status.displayName),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showBorrowItemDialog(item);
-            },
-            child: const Text('借用'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showReturnItemDialog(item);
-            },
-            child: const Text('归还'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showScrapItemDialog(item);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
-            child: const Text('报废'),
-          ),
-        ],
+    // 导航到物品详情页面
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ItemDetailPage(item: item),
       ),
     );
   }
@@ -240,16 +198,19 @@ class _InventoryPageState extends State<InventoryPage> {
         );
         
         if (mounted) {
-          // 显示成功提示
+          // 重新加载数据
+          _loadInventoryItems();
+          
+          // 显示成功提示，包含图片信息
+          final uploadedImages = result['uploadedImages'] as List<RecordImage>? ?? [];
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('借用成功'),
+            SnackBar(
+              content: Text(uploadedImages.isEmpty 
+                ? '借用申请已成功提交' 
+                : '借用申请已成功提交，已上传${uploadedImages.length}张图片'),
               backgroundColor: Colors.green,
             ),
           );
-          
-          // 重新加载数据
-          _loadInventoryItems();
         }
       } catch (e) {
         if (mounted) {
@@ -300,16 +261,19 @@ class _InventoryPageState extends State<InventoryPage> {
         );
         
         if (mounted) {
-          // 显示成功提示
+          // 重新加载数据
+          _loadInventoryItems();
+          
+          // 显示成功提示，包含图片信息
+          final uploadedImages = result['uploadedImages'] as List<RecordImage>? ?? [];
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('归还成功'),
+            SnackBar(
+              content: Text(uploadedImages.isEmpty 
+                ? '物品已成功归还' 
+                : '物品已成功归还，已上传${uploadedImages.length}张图片'),
               backgroundColor: Colors.green,
             ),
           );
-          
-          // 重新加载数据
-          _loadInventoryItems();
         }
       } catch (e) {
         if (mounted) {
@@ -359,16 +323,19 @@ class _InventoryPageState extends State<InventoryPage> {
         );
         
         if (mounted) {
-          // 显示成功提示
+          // 重新加载数据
+          _loadInventoryItems();
+          
+          // 显示成功提示，包含图片信息
+          final uploadedImages = result['uploadedImages'] as List<RecordImage>? ?? [];
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('物资报废成功'),
+            SnackBar(
+              content: Text(uploadedImages.isEmpty 
+                ? '报废申请已成功提交' 
+                : '报废申请已成功提交，已上传${uploadedImages.length}张图片'),
               backgroundColor: Colors.green,
             ),
           );
-          
-          // 重新加载数据
-          _loadInventoryItems();
         }
       } catch (e) {
         if (mounted) {
@@ -382,11 +349,6 @@ class _InventoryPageState extends State<InventoryPage> {
         }
       }
     }
-  }
-
-  // 物品详情行，使用DetailRowWidget组件
-  Widget _detailRow(String label, dynamic value) {
-    return DetailRowWidget(label: label, value: value);
   }
 
   @override

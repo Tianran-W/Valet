@@ -150,6 +150,49 @@ class ApiClient {
     }
   }
 
+  /// 上传文件
+  /// [endpoint] 上传端点
+  /// [filePath] 文件路径
+  /// [fieldName] 文件字段名
+  /// [additionalFields] 额外的表单字段
+  Future<dynamic> uploadFile(String endpoint, {
+    required String filePath,
+    required String fieldName,
+    Map<String, String>? additionalFields,
+    Map<String, String>? headers,
+  }) async {
+    try {
+      // 构建FormData
+      final formData = FormData();
+      
+      // 添加文件
+      formData.files.add(MapEntry(
+        fieldName, 
+        await MultipartFile.fromFile(filePath),
+      ));
+      
+      // 添加额外字段
+      if (additionalFields != null) {
+        for (final entry in additionalFields.entries) {
+          formData.fields.add(MapEntry(entry.key, entry.value));
+        }
+      }
+      
+      final response = await _dio.post(
+        endpoint,
+        data: formData,
+        options: Options(
+          headers: headers ?? {},
+          contentType: 'multipart/form-data',
+        ),
+      );
+      
+      return response.data;
+    } on DioException catch (e) {
+      return _handleDioException(e);
+    }
+  }
+
   /// 处理 Dio 异常
   dynamic _handleDioException(DioException e) {
     final response = e.response;

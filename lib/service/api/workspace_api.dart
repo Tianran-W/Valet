@@ -1,6 +1,8 @@
 import 'package:valet/service/logger_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/models/approval_model.dart';
+import 'package:valet/workspace/models/image_model.dart';
+
 import 'api_client.dart';
 
 /// 工作空间 API 类，处理工作空间相关的 API 请求
@@ -155,6 +157,7 @@ class WorkspaceApi {
   }
 
   /// 物资报废
+    /// 物资报废
   /// [materialId]: 物资ID
   /// [reason]: 报废原因
   Future<bool> scrapMaterial({
@@ -170,6 +173,75 @@ class WorkspaceApi {
     return true;
   }
   
+  // =================== 图片管理相关 API ===================
+
+  /// 上传图片
+  /// [filePath]: 图片文件路径
+  /// [recordType]: 记录类型
+  /// [recordId]: 记录ID
+  Future<ImageUploadResponse> uploadImage({
+    required String filePath,
+    required RecordType recordType,
+    required int recordId,
+  }) async {
+    try {
+      logger.info('上传图片: $filePath, recordType: ${recordType.value}, recordId: $recordId');
+      
+      final response = await _apiClient.uploadFile(
+        '/uploadImage',
+        filePath: filePath,
+        fieldName: 'file',
+        additionalFields: {
+          'recordType': recordType.value,
+          'recordId': recordId.toString(),
+        },
+      );
+      
+      return ImageUploadResponse.fromJson(response);
+    } catch (e) {
+      logger.error('上传图片失败: $e');
+      throw Exception('上传图片失败: $e');
+    }
+  }
+
+  /// 获取记录关联的图片列表
+  /// [recordType]: 记录类型
+  /// [recordId]: 记录ID
+  Future<List<RecordImage>> getRecordImages({
+    required RecordType recordType,
+    required int recordId,
+  }) async {
+    try {
+      logger.info('获取记录图片: recordType: ${recordType.value}, recordId: $recordId');
+      
+      final List<dynamic> response = await _apiClient.get('/images/record/${recordType.value}/$recordId');
+      return response.map((json) => RecordImage.fromJson(json)).toList();
+    } catch (e) {
+      logger.error('获取记录图片失败: $e');
+      throw Exception('获取记录图片失败: $e');
+    }
+  }
+
+  /// 删除图片
+  /// [imageId]: 图片ID
+  Future<bool> deleteImage(int imageId) async {
+    try {
+      logger.info('删除图片: $imageId');
+      
+      await _apiClient.delete('/images/$imageId');
+      return true;
+    } catch (e) {
+      logger.error('删除图片失败: $e');
+      throw Exception('删除图片失败: $e');
+    }
+  }
+
+  /// 获取图片URL
+  /// [imageId]: 图片ID
+  String getImageUrl(int imageId) {
+    return '${_apiClient.baseUrl}/api/images/$imageId';
+  }
+
   // =================== 审批相关 API ===================
 
   /// 获取待审批列表

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
+import 'package:valet/workspace/models/image_model.dart';
+import 'package:valet/workspace/presentation/widgets/image_upload_widget.dart';
 
 /// 借用物品对话框
 class BorrowItemDialog extends StatefulWidget {
@@ -22,6 +24,10 @@ class _BorrowItemDialogState extends State<BorrowItemDialog> {
   final _projectController = TextEditingController();
   final _reasonController = TextEditingController();
   
+  // 图片相关
+  List<RecordImage> _uploadedImages = [];
+  final int _tempRecordId = DateTime.now().millisecondsSinceEpoch; // 临时记录ID
+  
   @override
   void dispose() {
     _projectController.dispose();
@@ -33,51 +39,81 @@ class _BorrowItemDialogState extends State<BorrowItemDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('借用物品：${widget.item.name}'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 物品基本信息
-              _buildItemInfo(),
-              const SizedBox(height: 16),
-              
-              // 使用项目
-              TextFormField(
-                controller: _projectController,
-                decoration: const InputDecoration(
-                  labelText: '使用项目 *',
-                  hintText: '请输入使用项目',
-                  border: OutlineInputBorder(),
+      content: SizedBox(
+        width: double.maxFinite,
+        height: 600, // 增加高度以容纳图片上传组件
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 物品基本信息
+                _buildItemInfo(),
+                const SizedBox(height: 16),
+                
+                // 使用项目
+                TextFormField(
+                  controller: _projectController,
+                  decoration: const InputDecoration(
+                    labelText: '使用项目 *',
+                    hintText: '请输入使用项目',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入使用项目';
+                    }
+                    return null;
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '请输入使用项目';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              
-              // 申请原因
-              TextFormField(
-                controller: _reasonController,
-                decoration: const InputDecoration(
-                  labelText: '申请原因 *',
-                  hintText: '请输入申请原因',
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 16),
+                
+                // 申请原因
+                TextFormField(
+                  controller: _reasonController,
+                  decoration: const InputDecoration(
+                    labelText: '申请原因 *',
+                    hintText: '请输入申请原因',
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return '请输入申请原因';
+                    }
+                    return null;
+                  },
                 ),
-                maxLines: 3,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '请输入申请原因';
-                  }
-                  return null;
-                },
-              ),
-            ],
+                const SizedBox(height: 16),
+                
+                // 图片上传组件
+                Text(
+                  '相关图片（可选）',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 200,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ImageUploadWidget(
+                    recordType: RecordType.borrow,
+                    recordId: _tempRecordId, // 使用临时ID，稍后会替换
+                    onImagesChanged: (images) {
+                      setState(() {
+                        _uploadedImages = images;
+                      });
+                    },
+                    maxImages: 5,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -88,7 +124,7 @@ class _BorrowItemDialogState extends State<BorrowItemDialog> {
         ),
         FilledButton(
           onPressed: _submitForm,
-          child: const Text('借用'),
+          child: Text(_uploadedImages.isEmpty ? '借用' : '借用 (${_uploadedImages.length}张图片)'),
         ),
       ],
     );
@@ -145,6 +181,9 @@ class _BorrowItemDialogState extends State<BorrowItemDialog> {
         'isValuable': widget.item.isValuable,
         'usageProject': _projectController.text.trim(),
         'approvalReason': _reasonController.text.trim(),
+        // 添加图片相关信息
+        'uploadedImages': _uploadedImages,
+        'tempRecordId': _tempRecordId,
       };
       
       // 返回数据
