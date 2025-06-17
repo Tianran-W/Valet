@@ -108,4 +108,28 @@ class UserApi {
       throw Exception('修改密码失败: $e');
     }
   }
+
+  /// 获取全部用户（管理员接口）
+  /// 返回用户列表
+  Future<List<Map<String, dynamic>>?> getAllUsers() async {
+    try {
+      logger.info('开始获取全部用户列表', tag: 'UserApi');
+      
+      final response = await _apiClient.get('/admin/users');
+      
+      logger.info('获取用户列表响应: $response', tag: 'UserApi');
+      
+      if (response is List) {
+        return List<Map<String, dynamic>>.from(response);
+      } else if (response is Map<String, dynamic> && response['data'] is List) {
+        return List<Map<String, dynamic>>.from(response['data']);
+      } else {
+        logger.warning('用户列表响应格式异常: ${response.runtimeType}', tag: 'UserApi');
+        return [];
+      }
+    } catch (e) {
+      logger.error('获取全部用户失败: $e', tag: 'UserApi');
+      throw Exception('获取全部用户失败: $e');
+    }
+  }
 }

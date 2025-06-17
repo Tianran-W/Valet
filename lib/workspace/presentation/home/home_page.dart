@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:valet/workspace/presentation/pages/hr_page.dart';
 import 'package:valet/workspace/presentation/widgets/drawer.dart';
 import 'package:valet/workspace/presentation/pages/approval_page.dart';
 import 'package:valet/workspace/presentation/pages/dashboard_page.dart';

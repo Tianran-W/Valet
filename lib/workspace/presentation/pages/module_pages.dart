@@ -56,15 +56,6 @@ class PurchasePage extends StatelessWidget {
   }
 }
 
-class HRPage extends StatelessWidget {
-  const HRPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const AdminOnlyPage(pageName: '人力资源');
-  }
-}
-
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 

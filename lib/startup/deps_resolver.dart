@@ -2,6 +2,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:valet/service/logger_service.dart';
 import 'package:valet/service/api/api_service.dart';
+import 'package:valet/service/api/user_api.dart';
 import 'package:valet/user/user.dart';
 import 'package:valet/workspace/application/approval_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
@@ -43,6 +44,11 @@ class DepsResolver {
         baseUrl: backendUrl,
         headers: {},
       ),
+    );
+    
+    // 注册UserApi为单例
+    getIt.registerLazySingleton<UserApi>(
+      () => getIt<ApiService>().userApi,
     );
   }
 
