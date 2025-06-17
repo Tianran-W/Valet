@@ -4,7 +4,7 @@ import 'package:valet/user/application/auth_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
 import 'package:valet/workspace/models/image_model.dart';
-import 'package:valet/workspace/presentation/widgets/inventory/inventory_widgets.dart';
+import 'package:valet/workspace/presentation/widgets/inventory/inventory.dart';
 import 'package:valet/workspace/presentation/pages/item_detail_page.dart';
 
 class InventoryPage extends StatefulWidget {

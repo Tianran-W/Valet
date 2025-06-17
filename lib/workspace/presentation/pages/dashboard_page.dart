@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:valet/startup/startup.dart';
 import 'package:valet/user/application/auth_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
+import 'package:valet/workspace/application/battery_service.dart';
 import 'package:valet/workspace/models/inventory_model.dart';
-import 'package:valet/workspace/presentation/widgets/dashboard/return_reminder.dart';
-import 'package:valet/workspace/presentation/widgets/dashboard/inventory_alert.dart';
-import 'package:valet/workspace/presentation/widgets/dashboard/recommended_materials.dart';
+import 'package:valet/workspace/models/battery_model.dart';
+import 'package:valet/workspace/presentation/widgets/dashboard/dashboard.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -16,12 +16,14 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   late InventoryService _inventoryService;
+  late BatteryService _batteryService;
   late AuthService _authService;
   
   // 数据状态
   List<MaterialAlert> _inventoryWarnings = [];
   List<ReturnReminder> _returnReminders = [];
   List<RecommendedMaterial> _recommendedMaterials = [];
+  List<Battery> _batteries = [];
   bool _isLoading = false;
   bool _hasError = false;
   String _errorMessage = "";
@@ -34,6 +36,7 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _inventoryService = getIt<InventoryService>();
+    _batteryService = getIt<BatteryService>();
     _authService = getIt<AuthService>();
     _loadDashboardData();
   }
@@ -54,20 +57,26 @@ class _DashboardPageState extends State<DashboardPage> {
         final results = await Future.wait([
           _inventoryService.getInventoryWarnings(),
           _inventoryService.getReturnReminders(),
+          _batteryService.getAllBatteries(),
         ]);
 
         setState(() {
           _inventoryWarnings = results[0] as List<MaterialAlert>;
           _returnReminders = results[1] as List<ReturnReminder>;
+          _batteries = results[2] as List<Battery>;
           _isLoading = false;
         });
       } else {
-        // 普通用户只加载归还提醒（只显示自己的）
-        final returnReminders = await _inventoryService.getReturnReminders();
+        // 普通用户只加载归还提醒（只显示自己的）和电池数据
+        final results = await Future.wait([
+          _inventoryService.getReturnReminders(),
+          _batteryService.getAllBatteries(),
+        ]);
         
         setState(() {
           _inventoryWarnings = []; // 普通用户不需要看到库存预警
-          _returnReminders = returnReminders;
+          _returnReminders = results[0] as List<ReturnReminder>;
+          _batteries = results[1] as List<Battery>;
           _isLoading = false;
         });
       }
@@ -246,6 +255,12 @@ class _DashboardPageState extends State<DashboardPage> {
               onRefresh: _projectType != null && _participantCount != null 
                   ? _loadRecommendedMaterials 
                   : null,
+            ),
+            const SizedBox(height: 16),
+            
+            // 电池状态卡片（所有用户都可以看到）
+            BatteryStatusCard(
+              batteries: _batteries,
             ),
             const SizedBox(height: 16),
             

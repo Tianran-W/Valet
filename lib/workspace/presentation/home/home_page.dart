@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:valet/workspace/presentation/widgets/drawer_widgets.dart';
+import 'package:valet/workspace/presentation/widgets/drawer.dart';
 import 'package:valet/workspace/presentation/pages/approval_page.dart';
 import 'package:valet/workspace/presentation/pages/dashboard_page.dart';
 import 'package:valet/workspace/presentation/pages/inventory_page.dart';
+import 'package:valet/workspace/presentation/pages/battery_page.dart';
 import 'package:valet/workspace/presentation/pages/module_pages.dart';
 import 'package:valet/user/application/auth_service.dart';
 import 'package:valet/user/presentation/pages/login_page.dart';
@@ -31,6 +32,7 @@ class _HomePageState extends State<HomePage> {
   static final List<Widget> _pages = [
     const DashboardPage(),
     const InventoryPage(),
+    const BatteryPage(),
     const ApprovalPage(),
     const PurchasePage(),
     const HRPage(),
@@ -41,6 +43,7 @@ class _HomePageState extends State<HomePage> {
   final List<DrawerMenuItem> _allDrawerMenuItems = [
     DrawerMenuItem(title: '仪表盘', icon: Icons.dashboard, requiresAdmin: false),
     DrawerMenuItem(title: '库存管理', icon: Icons.inventory, requiresAdmin: false),
+    DrawerMenuItem(title: '电池管理', icon: Icons.battery_6_bar, requiresAdmin: false),
     DrawerMenuItem(title: '请求审批', icon: Icons.approval, requiresAdmin: true), // 只有管理员能看到
     DrawerMenuItem(title: '采购管理', icon: Icons.shopping_cart, requiresAdmin: true), // 只有管理员能看到
     DrawerMenuItem(title: '人力资源', icon: Icons.people, requiresAdmin: true), // 只有管理员能看到
@@ -63,10 +66,11 @@ class _HomePageState extends State<HomePage> {
     if (isAdmin) {
       return _pages; // 管理员可以访问所有页面
     } else {
-      // 普通用户只能访问前两个页面（仪表盘和库存管理）
+      // 普通用户可以访问前三个页面（仪表盘、库存管理、电池管理）
       return [
         const DashboardPage(),
         const InventoryPage(),
+        const BatteryPage(),
       ];
     }
   }
@@ -227,8 +231,8 @@ class _HomePageState extends State<HomePage> {
             ..._visibleDrawerMenuItems.asMap().entries.map((entry) {
               final idx = entry.key;
               final item = entry.value;
-              // 在第2项后插入分割线（仪表盘和库存管理后）
-              if (idx == 2 && _authService.currentUser?.isAdmin == true) {
+              // 在第3项后插入分割线（仪表盘、库存管理、电池管理后）
+              if (idx == 3 && _authService.currentUser?.isAdmin == true) {
                 return Column(
                   children: [
                     const Divider(),

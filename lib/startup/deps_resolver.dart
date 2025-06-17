@@ -6,6 +6,7 @@ import 'package:valet/user/user.dart';
 import 'package:valet/workspace/application/approval_service.dart';
 import 'package:valet/workspace/application/inventory_service.dart';
 import 'package:valet/workspace/application/image_service.dart';
+import 'package:valet/workspace/application/battery_service.dart';
 
 /// 依赖解析器
 /// 负责注册和初始化应用所需的所有服务
@@ -62,6 +63,9 @@ class DepsResolver {
     );
     getIt.registerLazySingleton<ImageService>(
       () => ImageService(getIt<ApiService>()),
+    );
+    getIt.registerLazySingleton<BatteryService>(
+      () => BatteryService(getIt<ApiService>()),
     );
   }
 }

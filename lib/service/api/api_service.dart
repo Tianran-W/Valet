@@ -1,6 +1,7 @@
 import 'api_client.dart';
 import 'workspace_api.dart';
 import 'user_api.dart';
+import 'battery_api.dart';
 
 /// API 服务类，整合所有 API 服务
 class ApiService {
@@ -11,6 +12,9 @@ class ApiService {
 
   /// 获取用户 API 实例
   UserApi get userApi => UserApi(_apiClient);
+
+  /// 获取电池 API 实例
+  BatteryApi get batteryApi => BatteryApi(_apiClient);
 
   /// 私有构造函数
   ApiService._({
