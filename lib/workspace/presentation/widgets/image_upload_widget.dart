@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:valet/workspace/models/image_model.dart';
 import 'package:valet/workspace/application/image_service.dart';
@@ -83,7 +82,7 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
     }
   }
 
-  /// 选择并上传图片（桌面端使用文件选择器）
+  /// 选择并上传图片
   Future<void> _pickAndUploadImage() async {
     if (_images.length >= widget.maxImages) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -93,34 +92,23 @@ class _ImageUploadWidgetState extends State<ImageUploadWidget> {
     }
 
     try {
-      if (PlatformHelper.isDesktop) {
-        // 桌面端使用文件选择器
-        FilePickerResult? result = await FilePicker.platform.pickFiles(
-          type: FileType.image,
-          allowMultiple: false,
-        );
-
-        if (result != null && result.files.single.path != null) {
-          await _uploadImage(result.files.single.path!);
-        }
-      } else {
-        // 移动端使用相册选择
-        // 检查相册权限
+      // 检查相册权限（移动端）
+      if (PlatformHelper.isMobile) {
         final hasPermission = await PermissionHelper.requestStoragePermission(context);
         if (!hasPermission) {
           return;
         }
+      }
 
-        final XFile? image = await _picker.pickImage(
-          source: ImageSource.gallery,
-          maxWidth: 1920,
-          maxHeight: 1920,
-          imageQuality: 85,
-        );
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
 
-        if (image != null) {
-          await _uploadImage(image.path);
-        }
+      if (image != null) {
+        await _uploadImage(image.path);
       }
     } catch (e) {
       if (mounted) {
