@@ -26,8 +26,8 @@ class _ApprovalPageState extends State<ApprovalPage> {
   bool _hasError = false;
   String _errorMessage = "";
   
-  // 用户ID（实际应用中应该从用户认证服务获取）
-  final int _currentUserId = 1;
+  // 用户ID
+  int get _currentUserId => int.tryParse(_authService.currentUser?.id ?? '0') ?? 0;
 
   @override
   void initState() {

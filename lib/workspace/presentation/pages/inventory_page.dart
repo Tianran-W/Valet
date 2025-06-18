@@ -35,7 +35,7 @@ class _InventoryPageState extends State<InventoryPage> {
   List<int> _userBorrowedItemIds = [];
   
   // 当前用户ID (在实际应用中应从认证系统获取)
-  final int _currentUserId = 1;
+  int get _currentUserId => int.tryParse(_authService.currentUser?.id ?? '0') ?? 0;
   
   // API服务
   late InventoryService _inventoryService;
